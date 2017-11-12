@@ -40,7 +40,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
     
     printf("Reading number of occurences. This may take a while!\n");
     printf("[status]");
-    //8 bits mode
+    //8 bit mode
     if(numofbits==8){
         int c;
         while((c=fgetc(fp))!=EOF){
@@ -54,7 +54,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
               k=0;
           }
         }
-    //16 bits mode    
+    //16 bit mode    
     }else{
         int upper,lower;
         //reading upper 8 bits
