@@ -69,8 +69,8 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
             k++;
             (*(occurences+num))++;
             //updating status every 100 KBytes
-            if(k>=100000){
-                cnt+=2;
+            if(k>=50000){
+                cnt+=1;
                 numofmbytes=cnt/10;
                 printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
                 k=0;    
