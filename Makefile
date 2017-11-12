@@ -1,10 +1,10 @@
 all:
-	gcc kompression.c utils/trees.c utils/files.c -o komp
-	./komp
+	gcc src/kompression.c src/utils/trees.c src/utils/files.c -o bin/komp
+	./bin/komp
 
 debug:
-	gcc -g kompression.c utils/trees.c utils/files.c -o komp
-	gdb komp
+	gcc -g src/kompression.c src/utils/trees.c src/utils/files.c -o bin/komp
+	gdb bin/komp
 
 install:
-	cp komp /usr/bin/komp
+	cp bin/komp /usr/bin/komp
