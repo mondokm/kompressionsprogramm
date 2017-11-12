@@ -29,18 +29,24 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
         printf("[error] Unsupported number of bits!");
         return NULL;
     }
+    //allocating memory
     unsigned int* occurences=(unsigned int*) calloc((numofbits==8?256:65536),sizeof(unsigned int));
+    //calculating filesize in MBytes
     long filesize_MB=get_file_size(fp)/1000000;
-    printf("Reading number of occurences. This may take a while!\n");
-    unsigned long cnt=0;
+    //initializing progress counter
+    unsigned long cnt=0, numofmbytes=cnt/10;
+    //k is used to limit the number of printfs called
     int k=0;
-    unsigned long numofmbytes=cnt/10;
+    
+    printf("Reading number of occurences. This may take a while!\n");
     printf("[status]");
+    //8 bits mode
     if(numofbits==8){
         int c;
         while((c=fgetc(fp))!=EOF){
           k++;
           (*(occurences+c))++;
+          //updating status every 100 KBytes
           if(k>=100000){
               cnt+=1;
               numofmbytes=cnt/10;
@@ -48,10 +54,13 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
               k=0;
           }
         }
+    //16 bits mode    
     }else{
         int upper,lower;
+        //reading upper 8 bits
         while((upper=fgetc(fp))!=EOF){
             unsigned short num;
+            //reading lower 8 bits
             if((lower=fgetc(fp))!=EOF){
                 num=upper*256+lower;
             }else{
@@ -59,6 +68,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
             }
             k++;
             (*(occurences+num))++;
+            //updating status every 100 KBytes
             if(k>=100000){
                 cnt+=2;
                 numofmbytes=cnt/10;
