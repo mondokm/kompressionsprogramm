@@ -27,18 +27,23 @@ char* create_filename(char* input){
 unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
-        return NULL;
     }
     unsigned int* occurences=(unsigned int*) calloc((numofbits==8?256:65536),sizeof(unsigned int));
     if(numofbits==8){
-        unsigned char c;
-        while(fscanf(fp,"%hhu",&c)!=EOF){
+        int c;
+        while((c=fgetc(fp))!=EOF){
             (*(occurences+c))++;
         }
     }else{
-        unsigned short s;
-        while(fscanf(fp,"%hu",&s)!=EOF){
-            (*(occurences+s))++;
+        int upper,lower;
+        while((upper=fgetc(fp))!=EOF){
+            unsigned short num;
+            if((lower=fgetc(fp))!=EOF){
+                num=upper*256+lower;
+            }else{
+                num=upper;
+            }
+            (*(occurences+num))++;
         }
     }
     return occurences;
