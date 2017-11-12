@@ -27,12 +27,26 @@ char* create_filename(char* input){
 unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
+        return NULL;
     }
     unsigned int* occurences=(unsigned int*) calloc((numofbits==8?256:65536),sizeof(unsigned int));
+    long filesize_MB=get_file_size(fp)/1000000;
+    printf("Reading number of occurences. This may take a while!\n");
+    unsigned long cnt=0;
+    int k=0;
+    unsigned long numofmbytes=cnt/10;
+    printf("[status]");
     if(numofbits==8){
         int c;
         while((c=fgetc(fp))!=EOF){
-            (*(occurences+c))++;
+          k++;
+          (*(occurences+c))++;
+          if(k>=100000){
+              cnt+=1;
+              numofmbytes=cnt/10;
+              printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+              k=0;
+          }
         }
     }else{
         int upper,lower;
@@ -43,9 +57,17 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
             }else{
                 num=upper;
             }
+            k++;
             (*(occurences+num))++;
+            if(k>=100000){
+                cnt+=2;
+                numofmbytes=cnt/10;
+                printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                k=0;    
+            }
         }
     }
+    printf("\nFinished reading.\n");
     return occurences;
 }
 
@@ -56,6 +78,7 @@ long get_file_size(FILE* fp){
         filesize = ftell(fp);
         fseek(fp,0,SEEK_SET);
     }
+    return filesize;
 }
 
 void close_file(FILE* fp){
