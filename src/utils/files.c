@@ -35,8 +35,8 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
     unsigned int* occurences=(unsigned int*) calloc((numofbits==8?256:65536),sizeof(unsigned int));
     //calculating filesize in MBytes
     long filesize_MB=get_file_size(fp)/1000000;
-    char str[6];
-    sprintf(str,"%ld",filesize_MB);
+    char str[12];
+    sprintf(str,"KB/%ldKB",filesize_MB);
     //initializing progress counter
     unsigned long cnt=0, numofmbytes=cnt/10;
     //k is used to limit the number of printfs called
@@ -55,7 +55,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
               cnt+=1;
               numofmbytes=cnt/10;
               //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
-              print_num(numofmbytes,str,6);
+              print_num(numofmbytes,str,12);
               k=0;
           }
         }

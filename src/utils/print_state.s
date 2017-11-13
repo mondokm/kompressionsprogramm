@@ -1,14 +1,6 @@
 .data
-//.text
 text1:
     .ascii "\r[status]"
-    //.byte 5
-text2:
-    .ascii "MB/"
-text3:
-    .ascii "MB"
-procent:
-    .byte 0x25
 null_help:
     .ascii "0"
 .text
@@ -60,24 +52,10 @@ loop:
     CMPQ $0,%r12
     JNE loop
 
-    MOVABSQ $text2, %rax
-    MOVQ %rax, %rsi
-    MOVQ $1, %rdi
-    MOVQ $1, %rax
-    MOVQ $3, %rdx
-    SYSCALL
-
     POPQ %rsi
     MOVQ $1, %rdi
     MOVQ $1, %rax
     POPQ %rdx
-    SYSCALL
-
-    MOVABSQ $text3, %rax
-    MOVQ %rax, %rsi
-    MOVQ $1, %rdi
-    MOVQ $1, %rax
-    MOVQ $2, %rdx
     SYSCALL
 
     RET
