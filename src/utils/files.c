@@ -18,7 +18,7 @@ char* create_filename(char* input){
     for(i=0;i<strlen(input);i++){
         if(*(input+i)=='.') k=i;
     }
-    //if it has an extension, then we cut it off
+    //if it has an extension, we cut it off
     if(i==0) k=strlen(input);
     char* first_n=(char*)malloc(sizeof(char)*k);
     strncpy(first_n,input,k);
@@ -36,7 +36,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
     //calculating filesize in MBytes
     long filesize_MB=get_file_size(fp)/1000000;
     char str[12];
-    sprintf(str,"KB/%ldKB",filesize_MB);
+    sprintf(str,"MB/%ldMB",filesize_MB);
     //initializing progress counter
     unsigned long cnt=0, numofmbytes=cnt/10;
     //k is used to limit the number of printfs called
@@ -77,7 +77,8 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
             if(k>=50000){
                 cnt+=1;
                 numofmbytes=cnt/10;
-                printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                print_num(numofmbytes,str,12);
                 k=0;    
             }
         }
