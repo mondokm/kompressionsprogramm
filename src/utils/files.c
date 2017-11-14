@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-extern void print_num(long,char*,int);
+extern void print_num(long,char*,int,int);
 
 FILE* open_file(char* name){
     return fopen(name,"r");
@@ -36,7 +36,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
     //calculating filesize in MBytes
     long filesize_MB=get_file_size(fp)/1000000;
     char str[12];
-    sprintf(str,"MB/%ldMB",filesize_MB);
+    sprintf(str,"MB/%ldMB ",filesize_MB);
     //initializing progress counter
     unsigned long cnt=0, numofmbytes=cnt/10;
     //k is used to limit the number of printfs called
@@ -55,7 +55,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
               cnt+=1;
               numofmbytes=cnt/10;
               //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
-              print_num(numofmbytes,str,12);
+              print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
               k=0;
           }
         }
@@ -78,7 +78,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
                 cnt+=1;
                 numofmbytes=cnt/10;
                 //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
-                print_num(numofmbytes,str,12);
+                print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
                 k=0;    
             }
         }
