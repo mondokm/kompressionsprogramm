@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 extern void print_num(long,char*,int,int);
+extern int read_byte(int,char*);
 
 FILE* open_file(char* name){
     return fopen(name,"r");
@@ -26,13 +27,13 @@ char* create_filename(char* input){
     return strcat(first_n,".komp");
 }
 
-unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
+unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return NULL;
     }
     //allocating memory
-    unsigned int* occurences=(unsigned int*) calloc((numofbits==8?256:65536),sizeof(unsigned int));
+    unsigned long* occurences=(unsigned long*) calloc((numofbits==8?256:65536),sizeof(unsigned long));
     //calculating filesize in MBytes
     long filesize_MB=get_file_size(fp)/1000000;
     char str[12];
@@ -44,6 +45,7 @@ unsigned int* read_num_of_occurences(FILE* fp, char numofbits){
     
     printf("Reading number of occurences. This may take a while!\n");
     printf("[status]");
+
     //8 bit mode
     if(numofbits==8){
         int c;

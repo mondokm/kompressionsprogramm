@@ -4,9 +4,13 @@
 typedef struct node{
     struct node* left;
     struct node* right;
-    char value;
+    unsigned short value;
+    unsigned long frequency;
+    
 }node;
 
 void free_tree(node* leaf);
+node** build_node_array(unsigned long*,int);
+node* build_node_tree(node**,int);
 
 #endif

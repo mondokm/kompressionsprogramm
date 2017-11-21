@@ -10,7 +10,7 @@ void close_file(FILE*);
 
 char* create_filename(char*);
 
-unsigned int* read_num_of_occurences(FILE*, char);
+unsigned long* read_num_of_occurences(FILE*, char);
 long get_file_size(FILE*);
 
 #endif
