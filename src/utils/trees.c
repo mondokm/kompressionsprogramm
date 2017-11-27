@@ -2,52 +2,54 @@
 #include <stdio.h>
 #include "trees.h"
 
+
+
+int compareNodes(const void*, const void*);
+
 void free_tree(node* root){
     if(root->right!=NULL) free_tree(root->right);
     if(root->left!=NULL) free_tree(root->left);
     free(root);
 }
 
-node** build_node_array(unsigned long* occurences,int arr_size){
-    node** arr=(node**)malloc(arr_size*sizeof(node*));
+node* build_nodeptr_list(unsigned long* occurences,int arr_size){
+    node* list;
     unsigned short i;
     for(i=0;i<arr_size;i++) {
-        *(arr+i)=(node*)malloc(sizeof(node));
-        (*(arr+i))->value=i;
-        (*(arr+i))->frequency=*(occurences+i);
-        (*(arr+i))->left=NULL;
-        (*(arr+i))->right=NULL;
+        list=add_list_node(list,newnode(i,*(occurences+i)));
     }
-    return arr;
+    return list;
 }
 
-node* build_node_tree(node** arr,int arr_size){
-    node* newnode;
-    char* used=(char*)calloc(256,sizeof(char));
-    while(arr_size>1){
-        int lowestindex,secondlowestindex;
-        //initializing lowest and secondlowest with the more frequent one of the first two
-        lowestindex=(*(arr))->frequency>(*(arr+1))->frequency?0:1;
-        secondlowestindex=lowestindex?0:1;
-        //finding the two nodes with the lowest frequency
-        for(int i=0;i<256;i++){
-            if(!used[i]&&(*(arr+i))->frequency<(*(arr+secondlowestindex))->frequency){
-                if((*(arr+i))->frequency<(*(arr+lowestindex))->frequency) {
-                    secondlowestindex=lowestindex;
-                    lowestindex=i;
-                }else {
-                    secondlowestindex=i;
-                }
-            }
-        }
-        newnode=(node*) malloc(sizeof(node));
-        newnode->left=*(arr+lowestindex);
-        newnode->right=*(arr+secondlowestindex);
-        newnode->frequency=(*(arr+lowestindex))->frequency+(*(arr+secondlowestindex))->frequency;
-        arr_size--;
-        *(arr+secondlowestindex)=newnode;
-        used[lowestindex]=1;
+node* build_node_tree(list_node* list,int arr_size){
+    unsigned char i;
+    for(i=0;i<arr_size;i++){
+        node* newnode=(node*) malloc(sizeof(node));
+        newnode->left=remove_least_frequent(list);
+        newnode->right=remove_least_frequent(list);
+        newnode->frequency=newnode->left->frequency+newnode->right->frequency;
+        add_list_node(list,newnode);
     }
-    free(used);
-    return *arr;
+    return list->nodeptr;
 }
+
+node* add_list_node(list_node* list,node* nodeptr){
+    list_node* newhead=(list_node*) malloc(sizeof(list_node));
+    newhead->next=list;
+    newhead->nodeptr=nodeptr;
+    return newhead;
+}
+
+node* newnode(unsigned short value,unsigned long frequency){
+    node* newnode=(node*)malloc(sizeof(node));
+    newnode->value=value;
+    newnode->frequency=frequency;
+}
+
+node* remove_least_frequent(list_node* list){
+
+}
+
+/*int compareNodes(const void* a,const void* b){
+    return ((node*)b)->frequency-((node*)a)->frequency;
+}*/
