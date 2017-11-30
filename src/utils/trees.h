@@ -14,12 +14,11 @@ typedef struct list_node{
 }list_node;
 
 void free_tree(node* leaf);
-node* add_list_node(list_node*,node*);
-node* remove_least_frequent(list_node*);
-node* find_least_frequent(list_node*);
-node* remove_list_node(list_node*);
+list_node* add_list_node(list_node*,node*);
+list_node* find_least_frequent(list_node*);
+list_node* remove_from_list(list_node*,list_node*);
 node* newnode(unsigned short,unsigned long);
-node** build_nodeptr_list(unsigned long*,int);
+list_node* build_nodeptr_list(unsigned long*,int);
 node* build_node_tree(list_node*,int);
 
 #endif
