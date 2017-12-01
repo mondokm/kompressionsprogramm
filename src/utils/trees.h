@@ -19,7 +19,7 @@ list_node* find_least_frequent(list_node*);
 list_node* remove_from_list(list_node*,list_node*);
 node* newnode(unsigned short,unsigned long);
 list_node* build_nodeptr_list(unsigned long*,int);
-node* build_node_tree(list_node*,int);
+node* build_node_tree(list_node*);
 void print_list(list_node*);
 
 #endif

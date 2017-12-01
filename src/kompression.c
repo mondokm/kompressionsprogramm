@@ -31,7 +31,7 @@ int main(int argc,char** argv){
     printf("%ld\n",sum);
 
     list_node* node_list=build_nodeptr_list(occurences,mode==8?256:65536);
-    node* head=build_node_tree(node_list,mode==8?256:65536);
+    node* head=build_node_tree(node_list);
 
     printf("Freq: %ld\n",head->frequency);
 
