@@ -11,16 +11,19 @@ void free_tree(node* root){
 }
 
 list_node* build_nodeptr_list(unsigned long* occurences,int arr_size){
-    list_node* list;
+    printf("Building list of nodes.\n");
+    list_node* list=NULL;
     unsigned short i;
     for(i=0;i<arr_size;i++) {
         list=add_list_node(list,newnode(i,*(occurences+i)));
     }
+    printf("Done.\n");
     return list;
 }
 
 node* build_node_tree(list_node* list,int arr_size){
-    unsigned char i;
+    printf("Building tree.\n");
+    int i;
     for(i=0;i<arr_size;i++){
         node* newnode=(node*) malloc(sizeof(node));
 
@@ -35,14 +38,22 @@ node* build_node_tree(list_node* list,int arr_size){
         newnode->frequency=newnode->left->frequency+newnode->right->frequency;
         add_list_node(list,newnode);
     }
+    printf("Done.\n");
     return list->nodeptr;
 }
 
 list_node* add_list_node(list_node* list,node* nodeptr){
-    list_node* newhead=(list_node*) malloc(sizeof(list_node));
-    newhead->next=list;
-    newhead->nodeptr=nodeptr;
-    return newhead;
+    if(list==NULL) {
+        list=(list_node*) malloc(sizeof(list_node));
+        list->next=NULL;
+        list->nodeptr=nodeptr;
+        return list;
+    }else{
+        list_node* newhead=(list_node*) malloc(sizeof(list_node));
+        newhead->next=list;
+        newhead->nodeptr=nodeptr;
+        return newhead;
+    }
 }
 
 node* newnode(unsigned short value,unsigned long frequency){
@@ -68,3 +79,8 @@ list_node* remove_from_list(list_node* list,list_node* element){
     } else remove_from_list(list->next,element);
     return list;
 }
+
+/*void print_list(list_node* list){
+    printf("nodeptr: %d\n",list->nodeptr);
+    if(list->next!=NULL)print_list(list->next);
+}*/
