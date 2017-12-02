@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "trees.h"
+#include "huffman.h"
 
 int compare_codelengths(const void*, const void*);
 

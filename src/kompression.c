@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "utils/files.h"
-#include "utils/trees.h"
+#include "utils/huffman.h"
 
 int main(int argc,char** argv){
     clock_t begin = clock();
