@@ -32,6 +32,13 @@ int main(int argc,char** argv){
 
     list_node* node_list=build_nodeptr_list(occurences,mode==8?256:65536);
     node* head=build_node_tree(node_list);
+    int* codelengths=build_codelength_array(head,mode==8?256:65536);
+    int min=*codelengths;
+    for(int i=0;i<(mode==8?256:65536);i++){
+        printf("%d: %d\n",i,*(codelengths+i));
+        if(*(codelengths+i)<min) min=*(codelengths+i);
+    }
+    printf("Min: %d\n",min);
 
     printf("Freq: %ld\n",head->frequency);
 

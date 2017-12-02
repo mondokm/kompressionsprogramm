@@ -59,6 +59,8 @@ node* newnode(unsigned short value,unsigned long frequency){
     node* newnode=(node*)malloc(sizeof(node));
     newnode->value=value;
     newnode->frequency=frequency;
+    newnode->left=NULL;
+    newnode->right=NULL;
 }
 
 list_node* find_least_frequent(list_node* list){
@@ -87,7 +89,23 @@ void print_list(list_node* list){
     if(list->next!=NULL)print_list(list->next);
 }
 
-char** build_dictionary(node* tree){
-    //char** dictionary=(char**) malloc()
-    return NULL;
+int* build_codelength_array(node* tree,int arr_size){
+    int* codelengths=(int*) malloc(arr_size*sizeof(int));
+    populate_codelength_array(tree,codelengths,0);
+    return codelengths;
+}
+
+void populate_codelength_array(node* tree,int* arr,int length){
+    if(tree->left==NULL&&tree->right==NULL){
+        *(arr+(tree->value))=length;
+    }else{
+        populate_codelength_array(tree->left,arr,length+1);
+        populate_codelength_array(tree->right,arr,length+1);
+    }
+}
+
+char** build_dictionary(node* tree,int arr_size){
+    char** dictionary=(char**) malloc(arr_size*sizeof(char*));
+
+    return dictionary;
 }

@@ -85,7 +85,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
             }
         }
     }
-    printf("\nFinished reading.\n");
+    printf("\r\nFinished reading.\n");
     return occurences;
 }
 

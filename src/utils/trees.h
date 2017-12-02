@@ -20,6 +20,9 @@ list_node* remove_from_list(list_node*,list_node*);
 node* newnode(unsigned short,unsigned long);
 list_node* build_nodeptr_list(unsigned long*,int);
 node* build_node_tree(list_node*);
+char** build_dictionary(node*,int);
+int* build_codelength_array(node*,int);
+void populate_codelength_array(node*,int*,int);
 void print_list(list_node*);
 
 #endif
