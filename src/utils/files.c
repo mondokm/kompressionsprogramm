@@ -64,9 +64,9 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
     //16 bit mode    
     }else{
         int upper,lower;
+        int num;
         //reading upper 8 bits
         while((upper=fgetc(fp))!=EOF){
-            unsigned short num;
             //reading lower 8 bits
             if((lower=fgetc(fp))!=EOF){
                 num=upper*256+lower;

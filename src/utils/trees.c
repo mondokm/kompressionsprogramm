@@ -13,7 +13,7 @@ void free_tree(node* root){
 list_node* build_nodeptr_list(unsigned long* occurences,int arr_size){
     printf("Building list of nodes.\n");
     list_node* list=NULL;
-    unsigned short i;
+    int i;
     for(i=0;i<arr_size;i++) {
         list=add_list_node(list,newnode(i,*(occurences+i)));
     }
@@ -85,4 +85,9 @@ list_node* remove_from_list(list_node* list,list_node* element){
 void print_list(list_node* list){
     printf("nodeptr: %d\n",list->nodeptr);
     if(list->next!=NULL)print_list(list->next);
+}
+
+char** build_dictionary(node* tree){
+    //char** dictionary=(char**) malloc()
+    return NULL;
 }

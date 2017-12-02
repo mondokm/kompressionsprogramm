@@ -25,7 +25,7 @@ int main(int argc,char** argv){
     if(fp!=NULL) close_file(fp);
     
     unsigned long sum=0;
-    for(int i=0;i<256;i++){
+    for(int i=0;i<(mode==8?256:65536);i++){
         sum+=*(occurences+i);
     }
     printf("%ld\n",sum);
