@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "trees.h"
 
-int compareNodes(const void*, const void*);
+int compare_codelengths(const void*, const void*);
 
 void free_tree(node* root){
     if(root->right!=NULL) free_tree(root->right);
@@ -89,23 +89,51 @@ void print_list(list_node* list){
     if(list->next!=NULL)print_list(list->next);
 }
 
-int* build_codelength_array(node* tree,int arr_size){
-    int* codelengths=(int*) malloc(arr_size*sizeof(int));
+int** build_codelength_array(node* tree,int arr_size){
+    int** codelengths=(int**) malloc(arr_size*sizeof(int*));
+    for(int i=0;i<arr_size;i++){
+        *(codelengths+i)=(int*) malloc(2*sizeof(int));
+        *(*(codelengths+i)+1)=i;
+    }
     populate_codelength_array(tree,codelengths,0);
     return codelengths;
 }
 
-void populate_codelength_array(node* tree,int* arr,int length){
+void populate_codelength_array(node* tree,int** arr,int length){
     if(tree->left==NULL&&tree->right==NULL){
-        *(arr+(tree->value))=length;
+        **(arr+(tree->value))=length;
     }else{
         populate_codelength_array(tree->left,arr,length+1);
         populate_codelength_array(tree->right,arr,length+1);
     }
 }
 
-char** build_dictionary(node* tree,int arr_size){
-    char** dictionary=(char**) malloc(arr_size*sizeof(char*));
-
+mpz_t* build_dictionary(int** arr,int arr_size){
+    mpz_t* dictionary=(mpz_t*) malloc(arr_size*sizeof(mpz_t));
+    qsort(arr,arr_size,sizeof(int*),compare_codelengths);
+    mpz_init(dictionary[0]);
+    for(int i=1;i<arr_size;i++){
+        mpz_init(dictionary[i]);
+        mpz_add_ui(dictionary[i],dictionary[i-1],1);
+        mpz_mul_2exp(dictionary[i],dictionary[i],**(arr+i)-**(arr+i-1));
+        //mpz_out_str(stdout,2,dictionary[i]);
+        //printf(" %d\n", **(arr+i));
+    }
     return dictionary;
+}
+
+int compare_codelengths(const void* a, const void* b){
+    int length1=*(*((int**)a)),length2=*(*((int**)b)),value1=*(*((int**)a)+1),value2=*(*((int**)b)+1);
+    if(length1<length2) return -1;
+    else if(length1==length2){
+        return value1-value2;
+    } else return 1;
+}
+
+int maxcodelength(int** arr,int arr_size){
+    int max=**arr;
+    for(int i=0;i<arr_size;i++){
+        //if()
+    }
+    return max;
 }
