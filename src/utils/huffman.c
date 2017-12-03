@@ -21,8 +21,10 @@ list_node* build_nodeptr_list(unsigned long* occurences,int arr_size){
     return list;
 }
 
-node* build_node_tree(list_node* list){
+node* build_node_tree(list_node* list,int arr_size){
     printf("Building tree.\n");
+    int remaining=arr_size;
+    printf("\e[?25l[status] %d/%d remaining, %.2f%%",remaining,arr_size,((double) 0/arr_size)*100);
     while(list->next!=NULL){
         node* newnode=(node*) malloc(sizeof(node));
 
@@ -36,8 +38,9 @@ node* build_node_tree(list_node* list){
 
         newnode->frequency=newnode->left->frequency+newnode->right->frequency;
         list=add_list_node(list,newnode);
+        printf("\r[status] %d/%d remaining, %.2f%% ",--remaining,arr_size,((double) (arr_size-remaining)/arr_size)*100);
     }
-    printf("Done.\n");
+    printf("\r\33[2K\e[?25hDone.\n");
     return list->nodeptr;
 }
 
@@ -133,7 +136,7 @@ int compare_codelengths(const void* a, const void* b){
 int maxcodelength(int** arr,int arr_size){
     int max=**arr;
     for(int i=0;i<arr_size;i++){
-        //if()
+        if(**(arr+i)>max) max=**(arr+i);
     }
     return max;
 }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "utils/files.h"
 #include "utils/huffman.h"
@@ -12,18 +13,18 @@ int main(int argc,char** argv){
         printf("[error] No file specified!\n");
         return 0;
     }
-    FILE* fp=open_file(*(argv+1));
+    FILE* file_in=read_file(*(argv+1));
     
     //could not open file
-    if(fp==NULL) {
+    if(file_in==NULL) {
         printf("Could not open file!\n");
         return 0;
     }
 
     char mode=argc>2?atoi(*(argv+2)):8;
-    unsigned long* occurences=read_num_of_occurences(fp,mode);
-    if(fp!=NULL) close_file(fp);
-    
+    unsigned long* occurences=read_num_of_occurences(file_in,mode);
+    if(file_in!=NULL) close_file(file_in);
+
     unsigned long sum=0;
     for(int i=0;i<(mode==8?256:65536);i++){
         sum+=*(occurences+i);
@@ -31,16 +32,24 @@ int main(int argc,char** argv){
     printf("%ld\n",sum);
 
     list_node* node_list=build_nodeptr_list(occurences,mode==8?256:65536);
-    node* head=build_node_tree(node_list);
+    node* head=build_node_tree(node_list,mode==8?256:65536);
     int** codelengths=build_codelength_array(head,mode==8?256:65536);
+    int** codelengths_dup=(int**)malloc((mode==8?256:65536)*sizeof(int*));
+    memcpy(codelengths_dup,codelengths,(mode==8?256:65536)*sizeof(int*));
+    
     unsigned long filesize=0;
     for(int i=0;i<(mode==8?256:65536);i++){
         filesize+=(**(codelengths+i))*(*(occurences+i));
     }
     printf("New filesize: %lu\n",filesize/8);
     mpz_t* dictionary=build_dictionary(codelengths,mode==8?256:65536);
-    
 
+    file_in=read_file(*(argv+1));
+    FILE* file_out=write_file(create_filename(*(argv+1)));
+    compress_file(dictionary,codelengths_dup,mode,file_in,file_out);
+    if(file_out!=NULL) close_file(file_out);
+    if(file_in!=NULL) close_file(file_in);
+    
     clock_t end = clock();
     double time_elapsed = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Time elapsed: %.2lfs\n",time_elapsed);

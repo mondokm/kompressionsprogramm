@@ -4,9 +4,16 @@
 
 extern void print_num(long,char*,int,int);
 extern int read_byte(int,char*);
+unsigned char binary_to_decimal(char*);
+char* create_code(char*,int);
+int write_to_file(FILE*,char*, int, char*, int);
 
-FILE* open_file(char* name){
+FILE* read_file(char* name){
     return fopen(name,"r");
+}
+
+FILE* write_file(char* name){
+    return fopen(name,"w");
 }
 
 FILE* create_output_file(char* name){
@@ -44,7 +51,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
     int k=0;
     
     printf("Reading number of occurences. This may take a while!\n");
-    printf("[status]");
+    printf("\e[?25l[status]");
 
     //8 bit mode
     if(numofbits==8){
@@ -85,7 +92,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
             }
         }
     }
-    printf("\r\nFinished reading.\n");
+    printf("\r\33[2K\e[?25hFinished reading.\n");
     return occurences;
 }
 
@@ -101,4 +108,102 @@ long get_file_size(FILE* fp){
 
 void close_file(FILE* fp){
     fclose(fp);
+}
+
+void compress_file(mpz_t* dictionary, int** codelengths, char numofbits, FILE* file_in, FILE* file_out){
+    if(numofbits!=8&&numofbits!=16){
+        printf("[error] Unsupported number of bits!");
+        return;
+    }
+    //calculating filesize in MBytes
+    long filesize_MB=get_file_size(file_in)/1000000;
+    char str[12];
+    sprintf(str,"MB/%ldMB ",filesize_MB);
+    //initializing progress counter
+    unsigned long cnt=0, numofmbytes=cnt/10;
+    //k is used to limit the number of printfs called
+    int k=0;
+    
+    char* queue=(char*) malloc((numofbits==8?256:65536)*sizeof(char));
+    int size_of_queue=0;
+
+    printf("Compresing file. This may take a while!\n");
+    printf("\e[?25l[status]");
+
+    //8 bit mode
+    if(numofbits==8){
+        int c;
+        while((c=fgetc(file_in))!=EOF){
+          k++;
+          char* str=mpz_get_str(NULL,2,dictionary[c]);
+          size_of_queue=write_to_file(file_out,queue,size_of_queue,create_code(str,**(codelengths+c)),**(codelengths+c));
+          //updating status every 100 KBytes
+          if(k>=100000){
+              cnt+=1;
+              numofmbytes=cnt/10;
+              //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+              print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
+              k=0;
+          }
+        }
+    //16 bit mode    
+    }else{
+        int upper,lower;
+        int num;
+        //reading upper 8 bits
+        while((upper=fgetc(file_in))!=EOF){
+            //reading lower 8 bits
+            if((lower=fgetc(file_in))!=EOF){
+                num=upper*256+lower;
+            }else{
+                num=upper;
+            }
+            k++;
+            //updating status every 100 KBytes
+            if(k>=50000){
+                cnt+=1;
+                numofmbytes=cnt/10;
+                //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
+                k=0;    
+            }
+        }
+    }
+    printf("\r\33[2K\e[?25hFinished compressing.\n");
+}
+
+int write_to_file(FILE* fp,char* queue, int size_of_queue, char* data, int size){
+    for(int i=0;i<size;i++){
+        *(queue+size_of_queue+i)=*(data+i);
+    }
+    size_of_queue+=size;
+    int bytes_written=0;
+    while(size_of_queue>=8){
+        fputc(binary_to_decimal(queue+bytes_written*8),fp);
+        size_of_queue-=8;
+    }
+    for(int i=0;i<size_of_queue;i++){
+        *(queue+i)=*(queue+i+bytes_written*8);
+    }
+    return size_of_queue;
+}
+
+unsigned char binary_to_decimal(char* binary){
+    char num=0;
+    for(int i=0;i<8;i++){
+        num+=(*(binary+i)-'0')*(1<<8-i-1);
+    }
+    return num;
+}
+
+char* create_code(char* str,int len){
+     char* code=(char*) malloc(len*sizeof(int));
+     int n=len-strlen(str);
+     for(int i=0;i<n;i++){
+         *(code+i)='0';
+     }
+     for(int j=n;j<len;j++){
+         *(code+j)=*(str+j-n);
+     }
+     return code;
 }
