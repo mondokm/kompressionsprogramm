@@ -5,8 +5,8 @@
 extern void print_num(long,char*,int,int);
 extern int read_byte(int,char*);
 unsigned char binary_to_decimal(char*);
-char* create_code(char*,int);
 int write_to_file(FILE*,char*, int, char*, int);
+int maxcodelength(int**,int);
 
 FILE* read_file(char* name){
     return fopen(name,"r");
@@ -110,7 +110,7 @@ void close_file(FILE* fp){
     fclose(fp);
 }
 
-void compress_file(mpz_t* dictionary, int** codelengths, char numofbits, FILE* file_in, FILE* file_out){
+void compress_file(char** dictionary, int** codelengths, char numofbits, FILE* file_in, FILE* file_out){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return;
@@ -124,7 +124,7 @@ void compress_file(mpz_t* dictionary, int** codelengths, char numofbits, FILE* f
     //k is used to limit the number of printfs called
     int k=0;
     
-    char* queue=(char*) malloc((numofbits==8?256:65536)*sizeof(char));
+    char* queue=(char*) malloc((maxcodelength(codelengths,numofbits==8?256:65536)+8)*sizeof(char));
     int size_of_queue=0;
 
     printf("Compresing file. This may take a while!\n");
@@ -135,8 +135,7 @@ void compress_file(mpz_t* dictionary, int** codelengths, char numofbits, FILE* f
         int c;
         while((c=fgetc(file_in))!=EOF){
           k++;
-          char* str=mpz_get_str(NULL,2,dictionary[c]);
-          size_of_queue=write_to_file(file_out,queue,size_of_queue,create_code(str,**(codelengths+c)),**(codelengths+c));
+          size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+c),**(codelengths+c));
           //updating status every 100 KBytes
           if(k>=100000){
               cnt+=1;
@@ -159,6 +158,7 @@ void compress_file(mpz_t* dictionary, int** codelengths, char numofbits, FILE* f
                 num=upper;
             }
             k++;
+            size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+num),**(codelengths+num));
             //updating status every 100 KBytes
             if(k>=50000){
                 cnt+=1;
@@ -170,6 +170,7 @@ void compress_file(mpz_t* dictionary, int** codelengths, char numofbits, FILE* f
         }
     }
     printf("\r\33[2K\e[?25hFinished compressing.\n");
+    free(queue);
 }
 
 int write_to_file(FILE* fp,char* queue, int size_of_queue, char* data, int size){
@@ -196,14 +197,10 @@ unsigned char binary_to_decimal(char* binary){
     return num;
 }
 
-char* create_code(char* str,int len){
-     char* code=(char*) malloc(len*sizeof(int));
-     int n=len-strlen(str);
-     for(int i=0;i<n;i++){
-         *(code+i)='0';
-     }
-     for(int j=n;j<len;j++){
-         *(code+j)=*(str+j-n);
-     }
-     return code;
+int maxcodelength(int** arr,int arr_size){
+    int max=**arr;
+    for(int i=0;i<arr_size;i++){
+        if(**(arr+i)>max) max=**(arr+i);
+    }
+    return max;
 }

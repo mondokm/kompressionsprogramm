@@ -13,7 +13,7 @@ void close_file(FILE*);
 char* create_filename(char*);
 
 unsigned long* read_num_of_occurences(FILE*, char);
-void compress_file(mpz_t*,int**, char, FILE*, FILE*);
+void compress_file(char**,int**, char, FILE*, FILE*);
 long get_file_size(FILE*);
 
 #endif

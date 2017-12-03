@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "huffman.h"
 
 int compare_codelengths(const void*, const void*);
+char* create_code(char*,int);
+unsigned char binary_to_decimal(char*);
 
 void free_tree(node* root){
     if(root->right!=NULL) free_tree(root->right);
@@ -111,7 +114,7 @@ void populate_codelength_array(node* tree,int** arr,int length){
     }
 }
 
-mpz_t* build_dictionary(int** arr,int arr_size){
+mpz_t* build_codes(int** arr,int arr_size){
     mpz_t* dictionary=(mpz_t*) malloc(arr_size*sizeof(mpz_t));
     qsort(arr,arr_size,sizeof(int*),compare_codelengths);
     mpz_init(dictionary[0]);
@@ -125,6 +128,15 @@ mpz_t* build_dictionary(int** arr,int arr_size){
     return dictionary;
 }
 
+char** build_dictionary(mpz_t* codes, int** codelengths, int arr_size){
+    char** dictionary=(char**) malloc(arr_size*sizeof(char*));
+    for(int i=0;i<arr_size;i++){
+        char* str=mpz_get_str(NULL,2,codes[i]);
+        *(dictionary+i)=create_code(str,**(codelengths+i));
+    }
+    return dictionary;
+}
+
 int compare_codelengths(const void* a, const void* b){
     int length1=*(*((int**)a)),length2=*(*((int**)b)),value1=*(*((int**)a)+1),value2=*(*((int**)b)+1);
     if(length1<length2) return -1;
@@ -133,10 +145,14 @@ int compare_codelengths(const void* a, const void* b){
     } else return 1;
 }
 
-int maxcodelength(int** arr,int arr_size){
-    int max=**arr;
-    for(int i=0;i<arr_size;i++){
-        if(**(arr+i)>max) max=**(arr+i);
-    }
-    return max;
+char* create_code(char* str,int len){
+     char* code=(char*) malloc(len*sizeof(int));
+     int n=len-strlen(str);
+     for(int i=0;i<n;i++){
+         *(code+i)='0';
+     }
+     for(int j=n;j<len;j++){
+         *(code+j)=*(str+j-n);
+     }
+     return code;
 }

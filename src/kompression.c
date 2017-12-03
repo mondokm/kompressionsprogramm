@@ -42,13 +42,19 @@ int main(int argc,char** argv){
         filesize+=(**(codelengths+i))*(*(occurences+i));
     }
     printf("New filesize: %lu\n",filesize/8);
-    mpz_t* dictionary=build_dictionary(codelengths,mode==8?256:65536);
+    mpz_t* codes=build_codes(codelengths,mode==8?256:65536);
+    char** dictionary=build_dictionary(codes,codelengths_dup,mode==8?256:65536);
 
     file_in=read_file(*(argv+1));
     FILE* file_out=write_file(create_filename(*(argv+1)));
     compress_file(dictionary,codelengths_dup,mode,file_in,file_out);
     if(file_out!=NULL) close_file(file_out);
     if(file_in!=NULL) close_file(file_in);
+    
+    free_tree(head);
+    free(dictionary);
+    free(codelengths);
+    free(occurences);
     
     clock_t end = clock();
     double time_elapsed = (double)(end - begin) / CLOCKS_PER_SEC;
