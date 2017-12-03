@@ -6,14 +6,14 @@ extern void print_num(long,char*,int,int);
 extern int read_byte(int,char*);
 unsigned char binary_to_decimal(char*);
 int write_to_file(FILE*,char*, int, char*, int);
-int maxcodelength(int**,int);
+int maxcodelength(unsigned short**,int);
 
 FILE* read_file(char* name){
-    return fopen(name,"r");
+    return fopen(name,"rb");
 }
 
 FILE* write_file(char* name){
-    return fopen(name,"w");
+    return fopen(name,"wb");
 }
 
 FILE* create_output_file(char* name){
@@ -71,17 +71,17 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
     //16 bit mode    
     }else{
         int upper,lower;
-        int num;
+        unsigned short* num;
         //reading upper 8 bits
-        while((upper=fgetc(fp))!=EOF){
+        while(fread(num,sizeof(unsigned short),1,fp)){
             //reading lower 8 bits
-            if((lower=fgetc(fp))!=EOF){
+            /*if((lower=fgetc(fp))!=EOF){
                 num=upper*256+lower;
             }else{
                 num=upper;
-            }
+            }*/
             k++;
-            (*(occurences+num))++;
+            (*(occurences+*num))++;
             //updating status every 100 KBytes
             if(k>=50000){
                 cnt+=1;
@@ -110,7 +110,36 @@ void close_file(FILE* fp){
     fclose(fp);
 }
 
-void compress_file(char** dictionary, int** codelengths, char numofbits, FILE* file_in, FILE* file_out){
+void write_codelengths(FILE* fp, unsigned short** codelengths, char numofbits){
+    if(numofbits!=8&&numofbits!=16){
+        printf("[error] Unsupported number of bits!");
+        return;
+    }
+    printf("Writing codelengths.\n");
+    printf("\e[?25l[status]");
+    fputc(numofbits,fp);
+    int arr_size=numofbits==8?256:65536;
+    unsigned short max_len=maxcodelength(codelengths,arr_size);
+    fwrite(&max_len,2,1,fp);
+    if(max_len<256){
+        for(int i=0;i<arr_size;i++){
+            fputc(**(codelengths+i),fp);
+            printf("\r[status] %d/%d %.2f%%",i,arr_size,((double)i/arr_size)*100);
+            //printf("%d\n",**(codelengths+i));
+        }
+    }else{
+        for(int i=0;i<arr_size;i++){
+            fwrite(*(codelengths+i),2,1,fp);
+            printf("\r[status] %d/%d %.2f%%",i,arr_size,((double)i/arr_size)*100);
+            //printf("%d\n",**(codelengths+i));
+        }
+    }
+    
+    printf("\r\33[2KDone.\n");
+
+}
+
+void compress_file(char** dictionary, unsigned short** codelengths, char numofbits, FILE* file_in, FILE* file_out){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return;
@@ -197,10 +226,39 @@ unsigned char binary_to_decimal(char* binary){
     return num;
 }
 
-int maxcodelength(int** arr,int arr_size){
+int maxcodelength(unsigned short** arr,int arr_size){
     int max=**arr;
     for(int i=0;i<arr_size;i++){
         if(**(arr+i)>max) max=**(arr+i);
     }
     return max;
+}
+
+unsigned short** read_codelengths(FILE* fp){
+    int numofbits=fgetc(fp);
+    if(numofbits!=8&&numofbits!=16){
+        printf("[error] Corrupted file!\n");
+        return NULL;
+    }
+    int arr_size=numofbits==8?256:65536;
+    unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(unsigned short*));
+    unsigned short max_len;
+    fread(&max_len,sizeof(unsigned short),1,fp);
+    if(max_len<256){
+        int c;
+        for(int i=0;i<arr_size;i++){
+            *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
+            **(codelengths+i)=c;
+            *(*(codelengths+i)+1)=i;
+        }
+    }else{
+        for(int i=0;i<arr_size;i++){
+            *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
+            fread(*(codelengths+i),sizeof(unsigned short),1,fp);
+            *(*(codelengths+i)+1)=i;
+            printf("%ud ",**(codelengths+i));
+        }
+    }
+    return codelengths;
+
 }

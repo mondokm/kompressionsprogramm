@@ -22,10 +22,10 @@ list_node* remove_from_list(list_node*,list_node*);
 node* newnode(unsigned short,unsigned long);
 list_node* build_nodeptr_list(unsigned long*,int);
 node* build_node_tree(list_node*,int);
-mpz_t* build_codes(int**,int);
-char** build_dictionary(mpz_t*,int**,int);
-int** build_codelength_array(node*,int);
-void populate_codelength_array(node*,int**,int);
+mpz_t* build_codes(unsigned short**,int);
+char** build_dictionary(mpz_t*,unsigned short**,int);
+unsigned short** build_codelength_array(node*,int);
+void populate_codelength_array(node*,unsigned short**,int);
 void print_list(list_node*);
 
 #endif

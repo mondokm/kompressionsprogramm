@@ -95,17 +95,17 @@ void print_list(list_node* list){
     if(list->next!=NULL)print_list(list->next);
 }
 
-int** build_codelength_array(node* tree,int arr_size){
-    int** codelengths=(int**) malloc(arr_size*sizeof(int*));
+unsigned short** build_codelength_array(node* tree,int arr_size){
+    unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(int*));
     for(int i=0;i<arr_size;i++){
-        *(codelengths+i)=(int*) malloc(2*sizeof(int));
+        *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
         *(*(codelengths+i)+1)=i;
     }
     populate_codelength_array(tree,codelengths,0);
     return codelengths;
 }
 
-void populate_codelength_array(node* tree,int** arr,int length){
+void populate_codelength_array(node* tree,unsigned short** arr,int length){
     if(tree->left==NULL&&tree->right==NULL){
         **(arr+(tree->value))=length;
     }else{
@@ -114,7 +114,7 @@ void populate_codelength_array(node* tree,int** arr,int length){
     }
 }
 
-mpz_t* build_codes(int** arr,int arr_size){
+mpz_t* build_codes(unsigned short** arr,int arr_size){
     mpz_t* dictionary=(mpz_t*) malloc(arr_size*sizeof(mpz_t));
     qsort(arr,arr_size,sizeof(int*),compare_codelengths);
     mpz_init(dictionary[0]);
@@ -128,7 +128,7 @@ mpz_t* build_codes(int** arr,int arr_size){
     return dictionary;
 }
 
-char** build_dictionary(mpz_t* codes, int** codelengths, int arr_size){
+char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size){
     char** dictionary=(char**) malloc(arr_size*sizeof(char*));
     for(int i=0;i<arr_size;i++){
         char* str=mpz_get_str(NULL,2,codes[i]);
@@ -138,7 +138,7 @@ char** build_dictionary(mpz_t* codes, int** codelengths, int arr_size){
 }
 
 int compare_codelengths(const void* a, const void* b){
-    int length1=*(*((int**)a)),length2=*(*((int**)b)),value1=*(*((int**)a)+1),value2=*(*((int**)b)+1);
+    int length1=*(*((unsigned short**)a)),length2=*(*((unsigned short**)b)),value1=*(*((unsigned short**)a)+1),value2=*(*((unsigned short**)b)+1);
     if(length1<length2) return -1;
     else if(length1==length2){
         return value1-value2;

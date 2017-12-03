@@ -33,9 +33,9 @@ int main(int argc,char** argv){
 
     list_node* node_list=build_nodeptr_list(occurences,mode==8?256:65536);
     node* head=build_node_tree(node_list,mode==8?256:65536);
-    int** codelengths=build_codelength_array(head,mode==8?256:65536);
-    int** codelengths_dup=(int**)malloc((mode==8?256:65536)*sizeof(int*));
-    memcpy(codelengths_dup,codelengths,(mode==8?256:65536)*sizeof(int*));
+    unsigned short** codelengths=build_codelength_array(head,mode==8?256:65536);
+    unsigned short** codelengths_dup=(unsigned short**)malloc((mode==8?256:65536)*sizeof(unsigned short*));
+    memcpy(codelengths_dup,codelengths,(mode==8?256:65536)*sizeof(unsigned short*));
     
     unsigned long filesize=0;
     for(int i=0;i<(mode==8?256:65536);i++){
@@ -47,6 +47,7 @@ int main(int argc,char** argv){
 
     file_in=read_file(*(argv+1));
     FILE* file_out=write_file(create_filename(*(argv+1)));
+    write_codelengths(file_out,codelengths_dup,mode);
     compress_file(dictionary,codelengths_dup,mode,file_in,file_out);
     if(file_out!=NULL) close_file(file_out);
     if(file_in!=NULL) close_file(file_in);
