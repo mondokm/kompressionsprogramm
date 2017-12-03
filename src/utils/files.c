@@ -7,6 +7,7 @@ extern int read_byte(int,char*);
 unsigned char binary_to_decimal(char*);
 int write_to_file(FILE*,char*, int, char*, int);
 int maxcodelength(unsigned short**,int);
+char read_bit(FILE*,char*);
 
 FILE* read_file(char* name){
     return fopen(name,"rb");
@@ -16,22 +17,22 @@ FILE* write_file(char* name){
     return fopen(name,"wb");
 }
 
-FILE* create_output_file(char* name){
-    return fopen(create_filename(name),"w");
-}
-
-char* create_filename(char* input){
-    //check if input has an extension
-    int i,k;
-    for(i=0;i<strlen(input);i++){
-        if(*(input+i)=='.') k=i;
+char* create_filename(char* input,compression_mode mode){
+    
+    if(mode==COMPRESSION){
+        return strcat(input,".komp");
+    }else{
+        //check if input has an extension
+        int i,k;
+        for(i=0;i<strlen(input);i++){
+            if(*(input+i)=='.') k=i;
+        }
+        //if it has an extension, we cut it off
+        if(i==0) k=strlen(input);
+        char* first_n=(char*)malloc(sizeof(char)*k);
+        strncpy(first_n,input,k);
+        return first_n;
     }
-    //if it has an extension, we cut it off
-    if(i==0) k=strlen(input);
-    char* first_n=(char*)malloc(sizeof(char)*k);
-    strncpy(first_n,input,k);
-    //we append .komp
-    return strcat(first_n,".komp");
 }
 
 unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
@@ -234,19 +235,21 @@ int maxcodelength(unsigned short** arr,int arr_size){
     return max;
 }
 
-unsigned short** read_codelengths(FILE* fp){
-    int numofbits=fgetc(fp);
-    if(numofbits!=8&&numofbits!=16){
+unsigned short** read_codelengths(FILE* fp,int* numofbits){
+    *numofbits=fgetc(fp);
+    if(*numofbits!=8&&*numofbits!=16){
         printf("[error] Corrupted file!\n");
         return NULL;
     }
-    int arr_size=numofbits==8?256:65536;
+    int arr_size=(*numofbits==8?256:65536);
     unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(unsigned short*));
     unsigned short max_len;
     fread(&max_len,sizeof(unsigned short),1,fp);
+    printf("Reading codelengths.\n");
     if(max_len<256){
         int c;
         for(int i=0;i<arr_size;i++){
+            c=fgetc(fp);
             *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
             **(codelengths+i)=c;
             *(*(codelengths+i)+1)=i;
@@ -259,6 +262,35 @@ unsigned short** read_codelengths(FILE* fp){
             printf("%ud ",**(codelengths+i));
         }
     }
+    printf("Done.\n");
     return codelengths;
 
+}
+
+void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
+    char c;
+    char* buffer=(char*)malloc(sizeof(char));
+    unsigned short num;
+    printf("Decompressing file.\n");
+    while((c=read_bit(file_in,buffer))!=EOF){
+        if((num=search_in_tree(&tree,c))!=-1){
+            printf("%d",c);
+            fwrite(&num,numofbits/2,1,file_out);
+        } 
+    }
+    printf("Finished decompressing.\n");
+}
+
+char read_bit(FILE* fp,char* buffer){
+    static char buffer_size=0;
+    if(buffer_size==0){
+        if(fread(buffer,sizeof(char),1,fp)){
+            buffer_size=8;
+        }
+    }
+    if(buffer_size==0) return EOF;
+    else {
+        buffer_size--;
+        return ((*(buffer)&(1<<8-buffer_size)))>>(8-buffer_size);
+    }
 }

@@ -10,52 +10,111 @@ int main(int argc,char** argv){
     
     //no arguments received
     if(argc<=1){
-        printf("[error] No file specified!\n");
+        printf("[error] Not enough arguments!\n");
         return 0;
     }
-    FILE* file_in=read_file(*(argv+1));
-    
-    //could not open file
-    if(file_in==NULL) {
-        printf("Could not open file!\n");
-        return 0;
+    compression_mode mode=COMPRESSION;
+    compression_bitlength bitlength=BYTE;
+    char flags=0;
+
+    if(**(argv+1)=='-'){
+        flags=1;
+        for(int i=1;i<strlen(*(argv+1));i++){
+            switch(*(*(argv+1)+i)){
+                case 'k':
+                    mode=COMPRESSION;
+                    break;
+                case 'd':
+                    mode=DECOMPRESSION;
+                    break;
+                case '8':
+                    bitlength=BYTE;
+                    break;
+                case '1':
+                    if(i<strlen(*(argv+1))-1){
+                        if(*(*(argv+1)+i+1)=='6'){
+                            bitlength=WORD;
+                            i++;
+                        }
+                    }
+            }
+        }
     }
-
-    char mode=argc>2?atoi(*(argv+2)):8;
-    unsigned long* occurences=read_num_of_occurences(file_in,mode);
-    if(file_in!=NULL) close_file(file_in);
-
-    unsigned long sum=0;
-    for(int i=0;i<(mode==8?256:65536);i++){
-        sum+=*(occurences+i);
-    }
-    printf("%ld\n",sum);
-
-    list_node* node_list=build_nodeptr_list(occurences,mode==8?256:65536);
-    node* head=build_node_tree(node_list,mode==8?256:65536);
-    unsigned short** codelengths=build_codelength_array(head,mode==8?256:65536);
-    unsigned short** codelengths_dup=(unsigned short**)malloc((mode==8?256:65536)*sizeof(unsigned short*));
-    memcpy(codelengths_dup,codelengths,(mode==8?256:65536)*sizeof(unsigned short*));
+    if(mode==COMPRESSION){
+        int numofbits=bitlength==BYTE?8:16;
+        int arr_size=bitlength==BYTE?256:65536;
     
-    unsigned long filesize=0;
-    for(int i=0;i<(mode==8?256:65536);i++){
-        filesize+=(**(codelengths+i))*(*(occurences+i));
-    }
-    printf("New filesize: %lu\n",filesize/8);
-    mpz_t* codes=build_codes(codelengths,mode==8?256:65536);
-    char** dictionary=build_dictionary(codes,codelengths_dup,mode==8?256:65536);
+       FILE* file_in=read_file(*(argv+1+flags));
 
-    file_in=read_file(*(argv+1));
-    FILE* file_out=write_file(create_filename(*(argv+1)));
-    write_codelengths(file_out,codelengths_dup,mode);
-    compress_file(dictionary,codelengths_dup,mode,file_in,file_out);
-    if(file_out!=NULL) close_file(file_out);
-    if(file_in!=NULL) close_file(file_in);
-    
-    free_tree(head);
-    free(dictionary);
-    free(codelengths);
-    free(occurences);
+        //could not open file
+        if(file_in==NULL) {
+            printf("Could not open file!\n");
+            return 0;
+        }
+
+        unsigned long* occurences=read_num_of_occurences(file_in,numofbits);
+        if(file_in!=NULL) close_file(file_in);
+
+        unsigned long sum=0;
+        for(int i=0;i<(arr_size);i++){
+            sum+=*(occurences+i);
+        }
+        printf("%ld\n",sum);
+
+        list_node* node_list=build_nodeptr_list(occurences,arr_size);
+        node* head=build_node_tree(node_list,arr_size);
+        unsigned short** codelengths=build_codelength_array(head,arr_size);
+        unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
+        memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
+        
+        unsigned long filesize=0;
+        for(int i=0;i<(arr_size);i++){
+            filesize+=(**(codelengths+i))*(*(occurences+i));
+        }
+        printf("New filesize: %lu\n",filesize/8);
+        mpz_t* codes=build_codes(codelengths,arr_size);
+        char** dictionary=build_dictionary(codes,codelengths_dup,arr_size);
+
+        file_in=read_file(*(argv+1));
+        FILE* file_out=write_file(create_filename(*(argv+1),COMPRESSION));
+        write_codelengths(file_out,codelengths_dup,numofbits);
+        compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out);
+        if(file_out!=NULL) close_file(file_out);
+        if(file_in!=NULL) close_file(file_in);
+        
+        free_tree(head);
+        free(dictionary);
+        free(codelengths);
+        free(occurences);
+    }else{
+        FILE* file_in=read_file(*(argv+1+flags));
+
+        //could not open file
+        if(file_in==NULL) {
+            printf("Could not open file!\n");
+            return 0;
+        }
+
+        int numofbits;
+        unsigned short** codelengths=read_codelengths(file_in,&numofbits);
+        int arr_size=numofbits==8?256:65536;
+        unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
+        memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
+        mpz_t* codes=build_codes(codelengths,arr_size);
+        char** dictionary=build_dictionary(codes,codelengths_dup,arr_size);    
+        node* tree=build_tree_from_codes(dictionary,arr_size);
+
+        FILE* file_out=write_file(create_filename(*(argv+2),DECOMPRESSION));
+        decompress_file(tree,file_in,file_out,numofbits);
+
+        close_file(file_in);
+        close_file(file_out);
+
+        free_tree(tree);
+        free(codelengths);
+        free(codelengths_dup);
+        free(dictionary);
+    }
     
     clock_t end = clock();
     double time_elapsed = (double)(end - begin) / CLOCKS_PER_SEC;

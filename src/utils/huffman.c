@@ -6,10 +6,13 @@
 int compare_codelengths(const void*, const void*);
 char* create_code(char*,int);
 unsigned char binary_to_decimal(char*);
+void add_to_tree(node*, node*, char*, unsigned short);
 
 void free_tree(node* root){
-    if(root->right!=NULL) free_tree(root->right);
-    if(root->left!=NULL) free_tree(root->left);
+    if(root->right!=NULL&&root->left!=NULL) {
+        free_tree(root->right);
+        free_tree(root->left);
+    }
     free(root);
 }
 
@@ -146,7 +149,7 @@ int compare_codelengths(const void* a, const void* b){
 }
 
 char* create_code(char* str,int len){
-     char* code=(char*) malloc(len*sizeof(int));
+     char* code=(char*) malloc((len+1)*sizeof(int));
      int n=len-strlen(str);
      for(int i=0;i<n;i++){
          *(code+i)='0';
@@ -154,5 +157,49 @@ char* create_code(char* str,int len){
      for(int j=n;j<len;j++){
          *(code+j)=*(str+j-n);
      }
+     *(code+len)='\0';
      return code;
+}
+
+node* build_tree_from_codes(char** codes,int arr_size){
+    node* head=(node*) malloc(sizeof(node));
+    head->left=NULL;
+    head->right=NULL;
+    head->value=-1;
+    for(int i=0;i<arr_size;i++){
+        add_to_tree(head,head,*(codes+i),i);
+    }
+    return head;
+}
+
+void add_to_tree(node* tree, node* head, char* code, unsigned short value){
+    if(strlen(code)==1){
+        tree->value=value;
+        tree->left=head;
+        tree->right=NULL;
+    }else{
+        code++;
+        if(*code=='0'){
+            tree->value=-1;
+            if(tree->left==NULL) tree->left=(node*) malloc(sizeof(node));
+            add_to_tree(tree->left,head,code,value);            
+        }else{
+            tree->value=-1;
+            if(tree->right==NULL) tree->right=(node*) malloc(sizeof(node));
+            add_to_tree(tree->right,head,code,value);
+        }
+    }
+}
+
+int search_in_tree(node** tree, char code){
+    if((*tree)->right==NULL) {
+        unsigned char val=(*tree)->value;    
+        *tree=(*tree)->left;
+        return val;
+    }
+    else{
+        if(code==0) *tree=(*tree)->left;
+        else *tree=(*tree)->right;
+        return -1;  
+    }
 }
