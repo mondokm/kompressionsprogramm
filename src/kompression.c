@@ -73,7 +73,7 @@ int main(int argc,char** argv){
         }
         printf("New filesize: %lu\n",filesize/8);
         mpz_t* codes=build_codes(codelengths,arr_size);
-        char** dictionary=build_dictionary(codes,codelengths_dup,arr_size);
+        char** dictionary=build_dictionary(codes,codelengths,arr_size);
 
         file_in=read_file(*(argv+1));
         FILE* file_out=write_file(create_filename(*(argv+1),COMPRESSION));
@@ -101,7 +101,8 @@ int main(int argc,char** argv){
         unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         mpz_t* codes=build_codes(codelengths,arr_size);
-        char** dictionary=build_dictionary(codes,codelengths_dup,arr_size);    
+        char** dictionary=build_dictionary(codes,codelengths,arr_size);
+
         node* tree=build_tree_from_codes(dictionary,arr_size);
 
         FILE* file_out=write_file(create_filename(*(argv+2),DECOMPRESSION));
