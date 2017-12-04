@@ -22,7 +22,7 @@ list_node* build_nodeptr_list(unsigned long* occurences,int arr_size){
     list_node* list=NULL;
     int i;
     for(i=0;i<arr_size;i++) {
-        if(*(occurences+i)!=0) list=add_list_node(list,newnode(i,*(occurences+i)));
+        list=add_list_node(list,newnode(i,*(occurences+i)));
     }
     printf("Done.\n");
     return list;
