@@ -121,8 +121,6 @@ mpz_t* build_codes(unsigned short** arr,int arr_size){
     mpz_t* dictionary=(mpz_t*) malloc(arr_size*sizeof(mpz_t));
     qsort(arr,arr_size,sizeof(int*),compare_codelengths);
     mpz_init(dictionary[0]);
-    mpz_out_str(stdout,2,dictionary[0]);
-    printf(" %d\n", **(arr+0));
     for(int i=1;i<arr_size;i++){
         mpz_init(dictionary[i]);
         mpz_add_ui(dictionary[i],dictionary[i-1],1);
@@ -169,7 +167,6 @@ node* build_tree_from_codes(char** codes,int arr_size){
     head->right=NULL;
     head->value=-1;
     for(int i=0;i<arr_size;i++){
-        if(strlen(*(codes+i))<=1) printf("%d\n",i);
         add_to_tree(head,head,*(codes+i),i);
     }
     return head;
@@ -177,11 +174,13 @@ node* build_tree_from_codes(char** codes,int arr_size){
 
 void add_to_tree(node* tree, node* head, char* code, unsigned short value){
     if(strlen(code)==1){
+        if(tree->left==NULL) tree->left=(node*) malloc(sizeof(node));
+        if(tree->right==NULL) tree->right=(node*) malloc(sizeof(node));
         if(*code=='0'){
-            if(tree->left==NULL) tree->left=(node*) malloc(sizeof(node));
+            tree->left=(node*) malloc(sizeof(node));
             tree=tree->left;
         }else{
-            if(tree->right==NULL) tree->right=(node*) malloc(sizeof(node));
+            tree->right=(node*) malloc(sizeof(node));
             tree=tree->right;
         }
         tree->value=value;
@@ -189,10 +188,9 @@ void add_to_tree(node* tree, node* head, char* code, unsigned short value){
         tree->right=NULL;
         
     }else{
-        code++;
         if(tree->left==NULL) tree->left=(node*) malloc(sizeof(node));
         if(tree->right==NULL) tree->right=(node*) malloc(sizeof(node));
-        if(*code=='0'){
+        if(*(code++)=='0'){
             add_to_tree(tree->left,head,code,value);            
         }else{
             add_to_tree(tree->right,head,code,value);

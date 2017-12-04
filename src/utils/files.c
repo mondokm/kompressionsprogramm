@@ -181,17 +181,12 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
     //16 bit mode    
     }else{
         int upper,lower;
-        int num;
+        unsigned short* num;
         //reading upper 8 bits
-        while((upper=fgetc(file_in))!=EOF){
+        while(fread(num,sizeof(unsigned short),1,file_in)){
             //reading lower 8 bits
-            if((lower=fgetc(file_in))!=EOF){
-                num=upper*256+lower;
-            }else{
-                num=upper;
-            }
             k++;
-            size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+num),**(codelengths+num));
+            size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+*num),**(codelengths+*num));
             //updating status every 100 KBytes
             if(k>=50000){
                 cnt+=1;
@@ -276,9 +271,10 @@ void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
     int num;
     printf("Decompressing file.\n");
     while((c=read_bit(file_in,buffer))!=EOF){
+        printf("%d",c);
         if((num=search_in_tree(&tree,c))!=-1){
-            printf("%d\n",num);
-            fwrite(&num,numofbits/2,1,file_out);
+            printf(" num: %d\n",num);
+            fwrite(&num,numofbits/8,1,file_out);
         } 
     }
     printf("Finished decompressing.\n");
@@ -294,6 +290,6 @@ char read_bit(FILE* fp,char* buffer){
     if(buffer_size==0) return EOF;
     else {
         buffer_size--;
-        return ((*(buffer)&(1<<8-buffer_size)))>>(8-buffer_size);
+        return ((*(buffer)&(1<<buffer_size)))>>(buffer_size);
     }
 }
