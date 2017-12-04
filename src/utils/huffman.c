@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "huffman.h"
+#include "files.h"
 
 int compare_codelengths(const void*, const void*);
 char* create_code(char*,int);
@@ -21,7 +22,7 @@ list_node* build_nodeptr_list(unsigned long* occurences,int arr_size){
     list_node* list=NULL;
     int i;
     for(i=0;i<arr_size;i++) {
-        list=add_list_node(list,newnode(i,*(occurences+i)));
+        if(*(occurences+i)!=0) list=add_list_node(list,newnode(i,*(occurences+i)));
     }
     printf("Done.\n");
     return list;

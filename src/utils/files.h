@@ -21,5 +21,6 @@ unsigned short** read_codelengths(FILE*,int*);
 void compress_file(char**,unsigned short**, char, FILE*, FILE*);
 void decompress_file(node*,FILE*, FILE*, char);
 long get_file_size(FILE*);
+int maxcodelength(unsigned short**,int);
 
 #endif

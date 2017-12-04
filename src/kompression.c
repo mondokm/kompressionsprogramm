@@ -75,6 +75,7 @@ int main(int argc,char** argv){
         mpz_t* codes=build_codes(codelengths,arr_size);
         char** dictionary=build_dictionary(codes,codelengths,arr_size);
 
+
         file_in=read_file(*(argv+1+flags));
         FILE* file_out=write_file(create_filename(*(argv+1+flags),COMPRESSION));
         write_codelengths(file_out,codelengths_dup,numofbits);

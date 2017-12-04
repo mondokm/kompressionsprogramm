@@ -6,7 +6,6 @@ extern void print_num(long,char*,int,int);
 extern int read_byte(int,char*);
 unsigned char binary_to_decimal(char*);
 int write_to_file(FILE*,char*, int, char*, int);
-int maxcodelength(unsigned short**,int);
 char read_bit(FILE*,char*);
 
 FILE* read_file(char* name){
@@ -62,7 +61,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
         while((c=fgetc(fp))!=EOF){
           k++;
           (*(occurences+c))++;
-          printf("%d\n",c);
+          //printf("%d\n",c);
           //updating status every 100 KBytes
           if(k>=100000){
               cnt+=1;
@@ -168,6 +167,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
         int c;
         while((c=fgetc(file_in))!=EOF){
           k++;
+          //printf("%s %d\n",*(dictionary+c),c);
           size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+c),**(codelengths+c));
           //updating status every 100 KBytes
           if(k>=100000){
@@ -210,6 +210,7 @@ int write_to_file(FILE* fp,char* queue, int size_of_queue, char* data, int size)
     while(size_of_queue>=8){
         fputc(binary_to_decimal(queue+bytes_written*8),fp);
         size_of_queue-=8;
+        bytes_written++;
     }
     for(int i=0;i<size_of_queue;i++){
         *(queue+i)=*(queue+i+bytes_written*8);
@@ -271,9 +272,9 @@ void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
     int num;
     printf("Decompressing file.\n");
     while((c=read_bit(file_in,buffer))!=EOF){
-        printf("%d",c);
+        //printf("%d",c);
         if((num=search_in_tree(&tree,c))!=-1){
-            printf(" num: %d\n",num);
+            //printf(" num: %d\n",num);
             fwrite(&num,numofbits/8,1,file_out);
         } 
     }
