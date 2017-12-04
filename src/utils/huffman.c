@@ -127,8 +127,8 @@ mpz_t* build_codes(unsigned short** arr,int arr_size){
         mpz_init(dictionary[i]);
         mpz_add_ui(dictionary[i],dictionary[i-1],1);
         mpz_mul_2exp(dictionary[i],dictionary[i],**(arr+i)-**(arr+i-1));
-        mpz_out_str(stdout,2,dictionary[i]);
-        printf(" %d\n", **(arr+i));
+        //mpz_out_str(stdout,2,dictionary[i]);
+        //printf(" %d\n", **(arr+i));
     }
     return dictionary;
 }
@@ -138,7 +138,6 @@ char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size
     for(int i=0;i<arr_size;i++){
         char* str=mpz_get_str(NULL,2,codes[i]);
         *(dictionary+*(*(codelengths+i)+1))=create_code(str,**(codelengths+i));
-        printf("%s : %d\n",*(dictionary+*(*(codelengths+i)+1)),**(codelengths+i));
     }
     return dictionary;
 }
@@ -170,6 +169,7 @@ node* build_tree_from_codes(char** codes,int arr_size){
     head->right=NULL;
     head->value=-1;
     for(int i=0;i<arr_size;i++){
+        if(strlen(*(codes+i))<=1) printf("%d\n",i);
         add_to_tree(head,head,*(codes+i),i);
     }
     return head;
@@ -177,14 +177,21 @@ node* build_tree_from_codes(char** codes,int arr_size){
 
 void add_to_tree(node* tree, node* head, char* code, unsigned short value){
     if(strlen(code)==1){
+        if(*code=='0'){
+            if(tree->left==NULL) tree->left=(node*) malloc(sizeof(node));
+            tree=tree->left;
+        }else{
+            if(tree->right==NULL) tree->right=(node*) malloc(sizeof(node));
+            tree=tree->right;
+        }
         tree->value=value;
         tree->left=head;
         tree->right=NULL;
+        
     }else{
         code++;
         if(tree->left==NULL) tree->left=(node*) malloc(sizeof(node));
         if(tree->right==NULL) tree->right=(node*) malloc(sizeof(node));
-        tree->value=-1;
         if(*code=='0'){
             add_to_tree(tree->left,head,code,value);            
         }else{
@@ -194,14 +201,12 @@ void add_to_tree(node* tree, node* head, char* code, unsigned short value){
 }
 
 int search_in_tree(node** tree, char code){
+    if(code==0) *tree=(*tree)->left;
+    else *tree=(*tree)->right;
     if((*tree)->right==NULL) {
-        unsigned char val=(*tree)->value;    
+        unsigned short val=(*tree)->value;    
         *tree=(*tree)->left;
         return val;
     }
-    else{
-        if(code==0) *tree=(*tree)->left;
-        else *tree=(*tree)->right;
-        return -1;  
-    }
+    else return -1;  
 }

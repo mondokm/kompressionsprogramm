@@ -20,7 +20,9 @@ FILE* write_file(char* name){
 char* create_filename(char* input,compression_mode mode){
     
     if(mode==COMPRESSION){
-        return strcat(input,".komp");
+        char* name=(char*)malloc((strlen(input)+5)*sizeof(char));
+        strcpy(name,input);
+        return strcat(name,".komp");
     }else{
         //check if input has an extension
         int i,k;
@@ -60,6 +62,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits){
         while((c=fgetc(fp))!=EOF){
           k++;
           (*(occurences+c))++;
+          printf("%d\n",c);
           //updating status every 100 KBytes
           if(k>=100000){
               cnt+=1;
@@ -270,11 +273,11 @@ unsigned short** read_codelengths(FILE* fp,int* numofbits){
 void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
     char c;
     char* buffer=(char*)malloc(sizeof(char));
-    unsigned short num;
+    int num;
     printf("Decompressing file.\n");
     while((c=read_bit(file_in,buffer))!=EOF){
         if((num=search_in_tree(&tree,c))!=-1){
-            printf("%d",c);
+            printf("%d\n",num);
             fwrite(&num,numofbits/2,1,file_out);
         } 
     }

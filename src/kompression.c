@@ -75,8 +75,8 @@ int main(int argc,char** argv){
         mpz_t* codes=build_codes(codelengths,arr_size);
         char** dictionary=build_dictionary(codes,codelengths,arr_size);
 
-        file_in=read_file(*(argv+1));
-        FILE* file_out=write_file(create_filename(*(argv+1),COMPRESSION));
+        file_in=read_file(*(argv+1+flags));
+        FILE* file_out=write_file(create_filename(*(argv+1+flags),COMPRESSION));
         write_codelengths(file_out,codelengths_dup,numofbits);
         compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out);
         if(file_out!=NULL) close_file(file_out);
@@ -97,7 +97,7 @@ int main(int argc,char** argv){
 
         int numofbits;
         unsigned short** codelengths=read_codelengths(file_in,&numofbits);
-        int arr_size=numofbits==8?256:65536;
+        int arr_size=(numofbits==8?256:65536);
         unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         mpz_t* codes=build_codes(codelengths,arr_size);
@@ -105,7 +105,7 @@ int main(int argc,char** argv){
 
         node* tree=build_tree_from_codes(dictionary,arr_size);
 
-        FILE* file_out=write_file(create_filename(*(argv+2),DECOMPRESSION));
+        FILE* file_out=write_file(create_filename(*(argv+1+flags),DECOMPRESSION));
         decompress_file(tree,file_in,file_out,numofbits);
 
         close_file(file_in);
