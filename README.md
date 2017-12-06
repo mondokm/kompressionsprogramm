@@ -18,7 +18,7 @@ sudo make install
 ```
 komp -k[ompression] -d[ekompression] -8[-bit] -16[-bit] file
 ```
-Default: 8-bit Kompression
+Default: 8-Bit Kompression
 
 ### Kompression
 
