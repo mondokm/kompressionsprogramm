@@ -46,3 +46,7 @@ Die folgende Befehl kompressiert abc.txt in 16-Bit mode (die Flagge k ist option
 ```
 komp -k16 abc.txt
 ```
+
+### Optimalisation
+
+8-Bit Kompression von Files kleiner als 295 Bytes wird sicherich in einem File größer als die originelle resultieren. 16-Bit Kompression ist nur für files größer als 70 KBytes empfohlen.
