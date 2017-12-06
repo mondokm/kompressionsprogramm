@@ -49,4 +49,4 @@ komp -k16 abc.txt
 
 ### Optimalisation
 
-8-Bit Kompression von Files kleiner als 295 Bytes wird sicherich in einem File größer als die originelle resultieren. 16-Bit Kompression ist nur für files größer als 70 KBytes empfohlen.
+8-Bit Kompression von Files kleiner als 295 Bytes wird sicherlich in einem File größer als die originelle resultieren. 16-Bit Kompression ist nur für files größer als 70 KBytes empfohlen.
