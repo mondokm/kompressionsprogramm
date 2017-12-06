@@ -16,35 +16,41 @@ int main(int argc,char** argv){
     compression_mode mode=COMPRESSION;
     compression_bitlength bitlength=BYTE;
     char flags=0;
-
-    if(**(argv+1)=='-'){
-        flags=1;
-        for(int i=1;i<strlen(*(argv+1));i++){
-            switch(*(*(argv+1)+i)){
-                case 'k':
-                    mode=COMPRESSION;
-                    break;
-                case 'd':
-                    mode=DECOMPRESSION;
-                    break;
-                case '8':
-                    bitlength=BYTE;
-                    break;
-                case '1':
-                    if(i<strlen(*(argv+1))-1){
-                        if(*(*(argv+1)+i+1)=='6'){
-                            bitlength=WORD;
-                            i++;
+    char filenum=0;
+    for(int i=1;i<argc;i++){
+        if(**(argv+i)=='-'){
+            for(int j=1;j<strlen(*(argv+i));j++){
+                switch(*(*(argv+i)+j)){
+                    case 'k':
+                        mode=COMPRESSION;
+                        break;
+                    case 'd':
+                        mode=DECOMPRESSION;
+                        break;
+                    case '8':
+                        bitlength=BYTE;
+                        break;
+                    case '1':
+                        if(i<strlen(*(argv+i))-1){
+                            if(*(*(argv+i)+j+1)=='6'){
+                                bitlength=WORD;
+                                j++;
+                            }
                         }
-                    }
+                }
             }
         }
+        else {
+            if(filenum) printf("Too many arguments.\n");
+            else filenum=i;
+        }
     }
+    
     if(mode==COMPRESSION){
         int numofbits=bitlength==BYTE?8:16;
         int arr_size=bitlength==BYTE?256:65537;
     
-       FILE* file_in=read_file(*(argv+1+flags));
+       FILE* file_in=read_file(*(argv+filenum));
 
         //could not open file
         if(file_in==NULL) {

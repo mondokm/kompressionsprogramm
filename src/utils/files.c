@@ -76,7 +76,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
         int bytes_read;
         unsigned short* num;
         //reading upper 8 bits
-        while(bytes_read,fread(num,sizeof(unsigned short),1,fp)){
+        while(bytes_read=fread(num,sizeof(unsigned short),1,fp)){
             //reading lower 8 bits
             if(bytes_read==1) {
                 *leftover=*num;
@@ -180,11 +180,11 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
     }else{
         unsigned short* num;
         //reading upper 8 bits
-        int bytes_read;
-        while(bytes_read=fread(num,sizeof(unsigned short),1,file_in)){
+        int elements_read;
+        while(elements_read=fread(num,1,2,file_in)){
             //reading lower 8 bits
             k++;
-            if(bytes_read==1){
+            if(elements_read==2){
                 size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+*num),**(codelengths+*num));
             }else{
                 size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+65537-1),**(codelengths+65536-1));
