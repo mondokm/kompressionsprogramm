@@ -84,7 +84,7 @@ int main(int argc,char** argv){
         free(codelengths);
         free(occurences);
     }else{
-        FILE* file_in=read_file(*(argv+1+flags));
+        FILE* file_in=read_file(*(argv+filenum));
 
         //could not open file
         if(file_in==NULL) {
@@ -103,7 +103,7 @@ int main(int argc,char** argv){
 
         node* tree=build_tree_from_codes(dictionary,arr_size,leftover);
 
-        FILE* file_out=write_file(create_filename(*(argv+1+flags),DECOMPRESSION));
+        FILE* file_out=write_file(create_filename(*(argv+filenum),DECOMPRESSION));
         decompress_file(tree,file_in,file_out,numofbits);
 
         close_file(file_in);
