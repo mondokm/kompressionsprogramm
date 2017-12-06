@@ -18,3 +18,12 @@ sudo make install
 ```
 komp -k[ompression] -d[ekompression] -8[-bit] -16[-bit] file
 ```
+Default: 8-bit Kompression
+
+### Kompression
+
+Das Programm wird erstens das File Byte zu Byte durchlesen und zahlen, wie viel es von die Verschiedene Variationen gibt. Mit der gesammelten Information wird es dann ein binären Baum bauen, mithilfe von denen es die Länge der Kodes berechnen wird.
+
+### Dekompression
+
+### Beispiele
