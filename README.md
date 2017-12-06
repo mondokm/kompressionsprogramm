@@ -22,8 +22,25 @@ Default: 8-bit Kompression
 
 ### Kompression
 
-Das Programm wird erstens das File Byte zu Byte durchlesen und zahlen, wie viel es von die Verschiedene Variationen gibt. Mit der gesammelten Information wird es dann ein binären Baum bauen, mithilfe von denen es die Länge der Kodes berechnen wird.
+Das Programm wird erstens das File Byte zu Byte durchlesen und zahlen, wie viel es von die Verschiedene Variationen gibt. Mit der gesammelten Information wird es dann ein binären Baum bauen, mithilfe von denen es die Länge der Kodes berechnen wird. Mit den Längen können wir die kanonische Huffman-Kodes unseren Wörterbuches generieren, und die Kompression durchführen.
 
 ### Dekompression
 
+Der Anfang der kompressiertes file enthält Header-Information (z.B. die benutzte Aufteilung, die Kodelängen, die Leftover-Bit), die wir einlesen, und benutzen, um ein Suchbaum zu bauen. Mit dem Suchbaum führen wir dann die Dekompression durch.
+
 ### Beispiele
+
+Die folgende Befehl kompressiert abc.txt in 8-Bit mode:
+```
+komp abc.txt
+```
+
+Um die generierte abc.txt.komp zu dekompressieren, sollen wir die folgende Befehl benutzen:
+```
+komp -d abc.txt.komp
+```
+
+Die folgende Befehl kompressiert abc.txt in 16-Bit mode (die Flagge k ist optionell):
+```
+komp -k16 abc.txt
+```
