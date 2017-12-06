@@ -24,6 +24,8 @@ Default: 8-bit Kompression
 
 Das Programm liest erstens das File Byte zu Byte durch und zählt, wie viel es von die Verschiedene Variationen gibt. Mit der gesammelten Information wird es dann ein binären Baum bauen, mithilfe von denen es die Länge der Kodes berechnen wird. Mit den Längen können wir die kanonische Huffman-Kodes unseren Wörterbuches generieren, und die Kompression durchführen.
 
+Der Ausgang wird der Filename `<originalfilename>.komp` haben.
+
 ### Dekompression
 
 Der Anfang der kompressiertes file enthält Header-Information (z.B. die benutzte Aufteilung, die Kodelängen, die Leftover-Bit), die wir einlesen, und benutzen, um ein Suchbaum zu bauen. Mit dem Suchbaum führen wir danach die Dekompression durch.
