@@ -27,7 +27,7 @@ char** build_dictionary(mpz_t*,unsigned short**,int);
 unsigned short** build_codelength_array(node*,int);
 void populate_codelength_array(node*,unsigned short**,int);
 void print_list(list_node*);
-node* build_tree_from_codes(char**,int);
+node* build_tree_from_codes(char**,int,int);
 int search_in_tree(node**,char);
 
 #endif

@@ -106,6 +106,10 @@ unsigned short** build_codelength_array(node* tree,int arr_size){
         *(*(codelengths+i)+1)=i;
     }
     populate_codelength_array(tree,codelengths,0);
+    if(arr_size==65537) {
+        **(codelengths+65536)=0;
+        **(codelengths+65536)=maxcodelength(codelengths,arr_size)+1;
+    }
     return codelengths;
 }
 
@@ -162,7 +166,7 @@ char* create_code(char* str,int len){
      return code;
 }
 
-node* build_tree_from_codes(char** codes,int arr_size){
+node* build_tree_from_codes(char** codes,int arr_size,int leftover){
     node* head=(node*) malloc(sizeof(node));
     head->left=NULL;
     head->right=NULL;
