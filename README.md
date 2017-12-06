@@ -7,7 +7,7 @@ Ein einfaches Huffman-Coding benutzendes Kompressionsprogramm. Das Programm kann
 
 ## Installation
 
-```bash
+```
 git clone https://github.com/mondokm/kompressionsprogramm.git
 cd kompressionsprogramm
 sudo make install
