@@ -8,10 +8,13 @@ Ein einfaches Huffman-Coding benutzendes Kompressionsprogramm. Das Programm kann
 ## Installation
 
 ```
-git clone https://github.com/mondokm/kompressionsprogramm.git
+git clone --recursive https://github.com/mondokm/kompressionsprogramm.git
 cd kompressionsprogramm
 sudo make install
 ```
 
-## Benutzung
+## Verwendung
 
+```
+komp -k[ompression] -d[ekompression] -8[-bit] -16[-bit] file
+```
