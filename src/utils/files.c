@@ -2,8 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef __linux__
 extern void print_num(long,char*,int,int);
-extern int read_byte(int,char*);
+#endif
 unsigned char binary_to_decimal(char*);
 int write_to_file(FILE*,char*, int, char*, int);
 char read_bit(FILE*,char*);
@@ -66,8 +67,11 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
           if(k>=100000){
               cnt+=1;
               numofmbytes=cnt/10;
-              //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+              #ifdef __linux__
               print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
+              #else
+              printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+              #endif              
               k=0;
           }
         }
@@ -76,7 +80,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
         int bytes_read;
         unsigned short* num;
         //reading upper 8 bits
-        while(bytes_read=fread(num,sizeof(unsigned short),1,fp)){
+        while(bytes_read=fread(num,1,2,fp)){
             //reading lower 8 bits
             if(bytes_read==1) {
                 *leftover=*num;
@@ -87,8 +91,11 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
             if(k>=50000){
                 cnt+=1;
                 numofmbytes=cnt/10;
-                //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                #ifdef __linux__
                 print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
+                #else
+                printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                #endif
                 k=0;    
             }
         }
@@ -171,8 +178,11 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
           if(k>=100000){
               cnt+=1;
               numofmbytes=cnt/10;
-              //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+              #ifdef __linux__
               print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
+              #else
+              printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+              #endif
               k=0;
           }
         }
@@ -186,6 +196,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
             k++;
             if(elements_read==2){
                 size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+*num),**(codelengths+*num));
+                printf("%s %d\n",*(dictionary+*num),num);
             }else{
                 size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+65537-1),**(codelengths+65536-1));
             }
@@ -193,8 +204,11 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
             if(k>=50000){
                 cnt+=1;
                 numofmbytes=cnt/10;
-                //printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                #ifdef __linux__
                 print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
+                #else
+                printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                #endif
                 k=0;    
             }
         }

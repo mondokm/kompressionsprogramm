@@ -138,9 +138,15 @@ mpz_t* build_codes(unsigned short** arr,int arr_size){
 
 char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size){
     char** dictionary=(char**) malloc(arr_size*sizeof(char*));
+    int n=arr_size;
+    if(arr_size==65537) n--; 
     for(int i=0;i<arr_size;i++){
         char* str=mpz_get_str(NULL,2,codes[i]);
         *(dictionary+*(*(codelengths+i)+1))=create_code(str,**(codelengths+i));
+    }
+    if(arr_size==65537){
+        char* str=mpz_get_str(NULL,2,codes[65536]);
+        *(dictionary+65536)=create_code(str,**(codelengths+65536));
     }
     return dictionary;
 }
