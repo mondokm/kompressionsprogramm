@@ -257,27 +257,37 @@ unsigned short** read_codelengths(FILE* fp,int* numofbits,unsigned short* leftov
         return NULL;
     }
     int arr_size=(*numofbits==8?256:65537);
+    int n=arr_size-(arr_size==65537);
     unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(unsigned short*));
     unsigned short max_len;
     fread(&max_len,sizeof(unsigned short),1,fp);
     printf("Reading codelengths.\n");
     if(max_len<256){
         int c;
-        for(int i=0;i<arr_size;i++){
+        for(int i=0;i<n;i++){
             c=fgetc(fp);
             *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
             **(codelengths+i)=c;
             *(*(codelengths+i)+1)=i;
         }
     }else{
-        for(int i=0;i<arr_size;i++){
+        for(int i=0;i<n;i++){
             *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
             fread(*(codelengths+i),sizeof(unsigned short),1,fp);
             *(*(codelengths+i)+1)=i;
             printf("%ud ",**(codelengths+i));
         }
     }
-    fread(&leftover,sizeof(char),1,fp);
+    if(n<arr_size){
+        int c=fgetc(fp);
+        if(c!=EOF){
+            *(codelengths+n)=(unsigned short*) malloc(2*sizeof(unsigned short));
+            **(codelengths+n)=c;
+            *(*(codelengths+n)+1)=n;
+        }
+        
+    }
+    fread(leftover,sizeof(char),1,fp);
     printf("Done.\n");
     return codelengths;
 
