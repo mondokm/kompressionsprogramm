@@ -12,3 +12,6 @@ debug:
 install:
 	make
 	cp bin/komp /usr/bin/komp
+
+windows:
+	gcc src/kompression.c src/utils/huffman.c src/utils/files.c -o bin/komp -lgmp
