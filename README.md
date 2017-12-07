@@ -3,7 +3,8 @@ Ein einfaches Huffman-Coding benutzendes Kompressionsprogramm. Das Programm kann
 
 ## Anforderungen
 * Linux oder BSD basiertes System
-* AMD64 Architektur
+* GMP
+* AMD64 Architektur (empfohlen)
 
 ## Installation
 

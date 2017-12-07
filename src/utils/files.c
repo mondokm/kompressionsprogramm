@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef __linux__
+#if defined(__linux__) && defined(__amd64__)
 extern void print_num(long,char*,int,int);
 #endif
 unsigned char binary_to_decimal(char*);
@@ -67,7 +67,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
           if(k>=100000){
               cnt+=1;
               numofmbytes=cnt/10;
-              #ifdef __linux__
+              #if defined(__linux__) && defined(__amd64__)
               print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
               #else
               printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
@@ -91,7 +91,7 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
             if(k>=50000){
                 cnt+=1;
                 numofmbytes=cnt/10;
-                #ifdef __linux__
+                #if defined(__linux__) && defined(__amd64__)
                 print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
                 #else
                 printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
@@ -178,7 +178,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
           if(k>=100000){
               cnt+=1;
               numofmbytes=cnt/10;
-              #ifdef __linux__
+              #if defined(__linux__) && defined(__amd64__)
               print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
               #else
               printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
@@ -204,7 +204,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
             if(k>=50000){
                 cnt+=1;
                 numofmbytes=cnt/10;
-                #ifdef __linux__
+                #if defined(__linux__) && defined(__amd64__)
                 print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
                 #else
                 printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
