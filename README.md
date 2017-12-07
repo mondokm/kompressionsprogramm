@@ -29,7 +29,7 @@ Der Ausgang wird der Filename `<originalfilename>.komp` haben.
 
 ### Dekompression
 
-Der Anfang der kompressiertes file enthält Header-Information (z.B. die benutzte Aufteilung, die Kodelängen, die Leftover-Bit), die wir einlesen, und benutzen, um ein Suchbaum zu bauen. Mit dem Suchbaum führen wir danach die Dekompression durch.
+Der Anfang der kompressiertes file enthält Header-Information (z.B. die benutzte Aufteilung, die Kodelängen, die Leftover-Byte), die wir einlesen, und benutzen, um ein Suchbaum zu bauen. Mit dem Suchbaum führen wir danach die Dekompression durch.
 
 ### Beispiele
 

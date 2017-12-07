@@ -147,7 +147,7 @@ void write_codelengths(FILE* fp, unsigned short** codelengths, char numofbits,in
 
 }
 
-void compress_file(char** dictionary, unsigned short** codelengths, char numofbits, FILE* file_in, FILE* file_out, int leftover){
+void compress_file(char** dictionary, unsigned short** codelengths, char numofbits, FILE* file_in, FILE* file_out, int leftover,char* flush){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return;
@@ -172,7 +172,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
         int c;
         while((c=fgetc(file_in))!=EOF){
           k++;
-          //printf("%s %d\n",*(dictionary+c),c);
+          printf("%s %d\n",*(dictionary+c),c);
           size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+c),**(codelengths+c));
           //updating status every 100 KBytes
           if(k>=100000){
@@ -213,6 +213,8 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
             }
         }
     }
+    printf("%s\n",flush);
+    write_to_file(file_out,queue,size_of_queue,flush,8);
     printf("\r\33[2K\e[?25hFinished compressing.\n");
     free(queue);
 }
@@ -225,6 +227,7 @@ int write_to_file(FILE* fp,char* queue, int size_of_queue, char* data, int size)
     int bytes_written=0;
     while(size_of_queue>=8){
         fputc(binary_to_decimal(queue+bytes_written*8),fp);
+        printf("(%x)",binary_to_decimal(queue+bytes_written*8));
         size_of_queue-=8;
         bytes_written++;
     }
@@ -287,7 +290,6 @@ unsigned short** read_codelengths(FILE* fp,int* numofbits,unsigned short* leftov
         }
         
     }
-    fread(leftover,sizeof(char),1,fp);
     printf("Done.\n");
     return codelengths;
 
@@ -311,9 +313,12 @@ void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
 char read_bit(FILE* fp,char* buffer){
     static char buffer_size=0;
     if(buffer_size==0){
-        if(fread(buffer,sizeof(char),1,fp)){
+        int c;
+        if((c=fgetc(fp))!=EOF){
+            *buffer=c;
             buffer_size=8;
         }
+        //printf("(%d)",*buffer);
     }
     if(buffer_size==0) return EOF;
     else {

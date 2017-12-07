@@ -68,13 +68,16 @@ int main(int argc,char** argv){
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         
         mpz_t* codes=build_codes(codelengths,arr_size);
-        char** dictionary=build_dictionary(codes,codelengths,arr_size);
+        char** flush=(char**)malloc(sizeof(char*));
+        char** dictionary=build_dictionary(codes,codelengths,arr_size,flush);
 
+        for(int i=0;i<arr_size;i++) printf("%s\n",*(dictionary+i));
+        printf("%s\n",*flush);
 
         file_in=read_file(*(argv+filenum));
         FILE* file_out=write_file(create_filename(*(argv+filenum),COMPRESSION));
         write_codelengths(file_out,codelengths_dup,numofbits,leftover);
-        compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out,leftover);
+        compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out,leftover,*flush);
         if(file_out!=NULL) close_file(file_out);
         if(file_in!=NULL) close_file(file_in);
         
@@ -98,15 +101,17 @@ int main(int argc,char** argv){
         unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         mpz_t* codes=build_codes(codelengths,arr_size);
-        char** dictionary=build_dictionary(codes,codelengths,arr_size);
+
+        char** flush=(char**)malloc(sizeof(char*));
+        char** dictionary=build_dictionary(codes,codelengths,arr_size,flush);
 
         for(int i=0;i<arr_size;i++) printf("%s\n",dictionary[i]);
 
-        node* tree=build_tree_from_codes(dictionary,arr_size,leftover);
+        node* tree=build_tree_from_codes(dictionary,arr_size,leftover,*flush);
 
         FILE* file_out=write_file(create_filename(*(argv+filenum),DECOMPRESSION));
         decompress_file(tree,file_in,file_out,numofbits);
-
+        
         close_file(file_in);
         close_file(file_out);
 

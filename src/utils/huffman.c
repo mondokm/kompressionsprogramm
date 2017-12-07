@@ -123,7 +123,7 @@ void populate_codelength_array(node* tree,unsigned short** arr,int length){
 }
 
 mpz_t* build_codes(unsigned short** arr,int arr_size){
-    mpz_t* dictionary=(mpz_t*) malloc(arr_size*sizeof(mpz_t));
+    mpz_t* dictionary=(mpz_t*) malloc((arr_size+1)*sizeof(mpz_t));
     qsort(arr,arr_size,sizeof(int*),compare_codelengths);
     mpz_init(dictionary[0]);
     for(int i=1;i<arr_size;i++){
@@ -133,11 +133,14 @@ mpz_t* build_codes(unsigned short** arr,int arr_size){
         //mpz_out_str(stdout,2,dictionary[i]);
         //printf(" %d\n", **(arr+i));
     }
+    mpz_init(dictionary[arr_size]);
+    mpz_add_ui(dictionary[arr_size],dictionary[arr_size-1],1);
+    mpz_mul_2exp(dictionary[arr_size],dictionary[arr_size],1);
     return dictionary;
 }
 
-char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size){
-    char** dictionary=(char**) malloc(arr_size*sizeof(char*));
+char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size,char** flush){
+    char** dictionary=(char**) malloc((arr_size+1)*sizeof(char*));
     int n=arr_size;
     if(arr_size==65537) n--; 
     for(int i=0;i<arr_size;i++){
@@ -148,6 +151,8 @@ char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size
         char* str=mpz_get_str(NULL,2,codes[65536]);
         *(dictionary+65536)=create_code(str,**(codelengths+65536));
     }
+    char* str=mpz_get_str(NULL,2,codes[arr_size]);
+    *flush=create_code(str,maxcodelength(codelengths,arr_size)+1);
     return dictionary;
 }
 
@@ -162,6 +167,7 @@ int compare_codelengths(const void* a, const void* b){
 char* create_code(char* str,int len){
      char* code=(char*) malloc((len+1)*sizeof(int));
      int n=len-strlen(str);
+     if(n<0) n=0;
      for(int i=0;i<n;i++){
          *(code+i)='0';
      }
@@ -172,7 +178,7 @@ char* create_code(char* str,int len){
      return code;
 }
 
-node* build_tree_from_codes(char** codes,int arr_size,int leftover){
+node* build_tree_from_codes(char** codes,int arr_size,int leftover,char* flush){
     node* head=(node*) malloc(sizeof(node));
     head->left=NULL;
     head->right=NULL;
@@ -180,6 +186,7 @@ node* build_tree_from_codes(char** codes,int arr_size,int leftover){
     for(int i=0;i<arr_size;i++){
         add_to_tree(head,head,*(codes+i),i);
     }
+    add_to_tree(head,head,flush,0);
     return head;
 }
 
