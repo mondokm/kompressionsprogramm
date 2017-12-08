@@ -5,6 +5,8 @@
 #if defined(__linux__) && defined(__amd64__)
 extern void print_num(long,char*,int,int);
 #endif
+
+extern int read_byte(int,char*);
 unsigned char binary_to_decimal(char*);
 int write_to_file(FILE*,char*, int, char*, int);
 char read_bit(FILE*,char*);
@@ -71,22 +73,24 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
               print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
               #else
               printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
-              #endif              
+              #endif
               k=0;
           }
         }
     //16 bit mode    
     }else{
-        int bytes_read;
+        int upper,lower;
         unsigned short* num;
         //reading upper 8 bits
-        while(bytes_read=fread(num,1,2,fp)){
+        while(fread(num,sizeof(unsigned short),1,fp)){
             //reading lower 8 bits
-            if(bytes_read==1) {
-                *leftover=*num;
-                *(occurences+65537-1)=1;
-             } else (*(occurences+*num))++;
+            /*if((lower=fgetc(fp))!=EOF){
+                num=upper*256+lower;
+            }else{
+                num=upper;
+            }*/
             k++;
+            (*(occurences+*num))++;
             //updating status every 100 KBytes
             if(k>=50000){
                 cnt+=1;
@@ -118,7 +122,7 @@ void close_file(FILE* fp){
     fclose(fp);
 }
 
-void write_codelengths(FILE* fp, unsigned short** codelengths, char numofbits,int leftover){
+void write_codelengths(FILE* fp, unsigned short** codelengths, char numofbits){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return;
@@ -142,12 +146,12 @@ void write_codelengths(FILE* fp, unsigned short** codelengths, char numofbits,in
             //printf("%d\n",**(codelengths+i));
         }
     }
-    fwrite(&leftover,sizeof(char),1,fp);
+    
     printf("\r\33[2KDone.\n");
 
 }
 
-void compress_file(char** dictionary, unsigned short** codelengths, char numofbits, FILE* file_in, FILE* file_out, int leftover,char* flush){
+void compress_file(char** dictionary, unsigned short** codelengths, char numofbits, FILE* file_in, FILE* file_out){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return;
@@ -172,7 +176,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
         int c;
         while((c=fgetc(file_in))!=EOF){
           k++;
-          printf("%s %d\n",*(dictionary+c),c);
+          //printf("%s %d\n",*(dictionary+c),c);
           size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+c),**(codelengths+c));
           //updating status every 100 KBytes
           if(k>=100000){
@@ -188,18 +192,13 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
         }
     //16 bit mode    
     }else{
+        int upper,lower;
         unsigned short* num;
         //reading upper 8 bits
-        int elements_read;
-        while(elements_read=fread(num,1,2,file_in)){
+        while(fread(num,sizeof(unsigned short),1,file_in)){
             //reading lower 8 bits
             k++;
-            if(elements_read==2){
-                size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+*num),**(codelengths+*num));
-                printf("%s %d\n",*(dictionary+*num),num);
-            }else{
-                size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+65537-1),**(codelengths+65536-1));
-            }
+            size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+*num),**(codelengths+*num));
             //updating status every 100 KBytes
             if(k>=50000){
                 cnt+=1;
@@ -213,8 +212,6 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
             }
         }
     }
-    printf("%s\n",flush);
-    write_to_file(file_out,queue,size_of_queue,flush,8);
     printf("\r\33[2K\e[?25hFinished compressing.\n");
     free(queue);
 }
@@ -227,7 +224,6 @@ int write_to_file(FILE* fp,char* queue, int size_of_queue, char* data, int size)
     int bytes_written=0;
     while(size_of_queue>=8){
         fputc(binary_to_decimal(queue+bytes_written*8),fp);
-        printf("(%x)",binary_to_decimal(queue+bytes_written*8));
         size_of_queue-=8;
         bytes_written++;
     }
@@ -253,42 +249,32 @@ int maxcodelength(unsigned short** arr,int arr_size){
     return max;
 }
 
-unsigned short** read_codelengths(FILE* fp,int* numofbits,unsigned short* leftover){
+unsigned short** read_codelengths(FILE* fp,int* numofbits){
     *numofbits=fgetc(fp);
     if(*numofbits!=8&&*numofbits!=16){
         printf("[error] Corrupted file!\n");
         return NULL;
     }
-    int arr_size=(*numofbits==8?256:65537);
-    int n=arr_size-(arr_size==65537);
+    int arr_size=(*numofbits==8?256:65536);
     unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(unsigned short*));
     unsigned short max_len;
     fread(&max_len,sizeof(unsigned short),1,fp);
     printf("Reading codelengths.\n");
     if(max_len<256){
         int c;
-        for(int i=0;i<n;i++){
+        for(int i=0;i<arr_size;i++){
             c=fgetc(fp);
             *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
             **(codelengths+i)=c;
             *(*(codelengths+i)+1)=i;
         }
     }else{
-        for(int i=0;i<n;i++){
+        for(int i=0;i<arr_size;i++){
             *(codelengths+i)=(unsigned short*) malloc(2*sizeof(unsigned short));
             fread(*(codelengths+i),sizeof(unsigned short),1,fp);
             *(*(codelengths+i)+1)=i;
             printf("%ud ",**(codelengths+i));
         }
-    }
-    if(n<arr_size){
-        int c=fgetc(fp);
-        if(c!=EOF){
-            *(codelengths+n)=(unsigned short*) malloc(2*sizeof(unsigned short));
-            **(codelengths+n)=c;
-            *(*(codelengths+n)+1)=n;
-        }
-        
     }
     printf("Done.\n");
     return codelengths;
@@ -301,9 +287,9 @@ void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
     int num;
     printf("Decompressing file.\n");
     while((c=read_bit(file_in,buffer))!=EOF){
-        printf("%d",c);
+        //printf("%d",c);
         if((num=search_in_tree(&tree,c))!=-1){
-            printf(" num: %d\n",num);
+            //printf(" num: %d\n",num);
             fwrite(&num,numofbits/8,1,file_out);
         } 
     }
@@ -313,12 +299,9 @@ void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
 char read_bit(FILE* fp,char* buffer){
     static char buffer_size=0;
     if(buffer_size==0){
-        int c;
-        if((c=fgetc(fp))!=EOF){
-            *buffer=c;
+        if(fread(buffer,sizeof(char),1,fp)){
             buffer_size=8;
         }
-        //printf("(%d)",*buffer);
     }
     if(buffer_size==0) return EOF;
     else {

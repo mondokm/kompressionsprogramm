@@ -47,7 +47,7 @@ int main(int argc,char** argv){
     
     if(mode==COMPRESSION){
         int numofbits=bitlength==BYTE?8:16;
-        int arr_size=bitlength==BYTE?256:65537;
+        int arr_size=bitlength==BYTE?256:65536;
     
        FILE* file_in=read_file(*(argv+filenum));
 
@@ -69,15 +69,12 @@ int main(int argc,char** argv){
         
         mpz_t* codes=build_codes(codelengths,arr_size);
         char** flush=(char**)malloc(sizeof(char*));
-        char** dictionary=build_dictionary(codes,codelengths,arr_size,flush);
-
-        for(int i=0;i<arr_size;i++) printf("%s\n",*(dictionary+i));
-        printf("%s\n",*flush);
+        char** dictionary=build_dictionary(codes,codelengths,arr_size);
 
         file_in=read_file(*(argv+filenum));
         FILE* file_out=write_file(create_filename(*(argv+filenum),COMPRESSION));
-        write_codelengths(file_out,codelengths_dup,numofbits,leftover);
-        compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out,leftover,*flush);
+        write_codelengths(file_out,codelengths_dup,numofbits);
+        compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out);
         if(file_out!=NULL) close_file(file_out);
         if(file_in!=NULL) close_file(file_in);
         
@@ -96,20 +93,19 @@ int main(int argc,char** argv){
 
         int numofbits;
         unsigned short leftover;
-        unsigned short** codelengths=read_codelengths(file_in,&numofbits,&leftover);
+        unsigned short** codelengths=read_codelengths(file_in,&numofbits);
         int arr_size=(numofbits==8?256:65537);
         unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         mpz_t* codes=build_codes(codelengths,arr_size);
 
         char** flush=(char**)malloc(sizeof(char*));
-        char** dictionary=build_dictionary(codes,codelengths,arr_size,flush);
+        char** dictionary=build_dictionary(codes,codelengths,arr_size);
 
-        for(int i=0;i<arr_size;i++) printf("%s\n",dictionary[i]);
-
-        node* tree=build_tree_from_codes(dictionary,arr_size,leftover,*flush);
+        node* tree=build_tree_from_codes(dictionary,arr_size);
 
         FILE* file_out=write_file(create_filename(*(argv+filenum),DECOMPRESSION));
+        for(int i=0;i<arr_size;i++) printf("%s\n",dictionary[i]);
         decompress_file(tree,file_in,file_out,numofbits);
         
         close_file(file_in);
