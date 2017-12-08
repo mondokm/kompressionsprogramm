@@ -57,19 +57,25 @@ int main(int argc,char** argv){
             return 0;
         }
 
-        unsigned short leftover;
+        char leftover=0;
         unsigned long* occurences=read_num_of_occurences(file_in,numofbits,&leftover);
         if(file_in!=NULL) close_file(file_in);
 
         list_node* node_list=build_nodeptr_list(occurences,arr_size);
         node* head=build_node_tree(node_list,arr_size);
         unsigned short** codelengths=build_codelength_array(head,arr_size);
+
+        int maxlen=maxcodelength(codelengths,arr_size);
+        compression_bitlength codelength_length=BYTE;
+        if(maxlen>8) codelength_length=WORD;
         unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         
         mpz_t* codes=build_codes(codelengths,arr_size);
         char** flush=(char**)malloc(sizeof(char*));
         char** dictionary=build_dictionary(codes,codelengths,arr_size);
+
+        char header=create_header_byte()
 
         file_in=read_file(*(argv+filenum));
         FILE* file_out=write_file(create_filename(*(argv+filenum),COMPRESSION));

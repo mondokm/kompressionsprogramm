@@ -39,7 +39,7 @@ char* create_filename(char* input,compression_mode mode){
     }
 }
 
-unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* leftover){
+unsigned long* read_num_of_occurences(FILE* fp, char numofbits,char* leftover){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return NULL;
@@ -117,18 +117,12 @@ void close_file(FILE* fp){
     fclose(fp);
 }
 
-void write_codelengths(FILE* fp, unsigned short** codelengths, char numofbits){
-    if(numofbits!=8&&numofbits!=16){
-        printf("[error] Unsupported number of bits!");
-        return;
-    }
+void write_codelengths(FILE* fp, unsigned short** codelengths, char header, char leftover){
     printf("Writing codelengths.\n");
     printf("\e[?25l[status]");
-    fputc(numofbits,fp);
-    int arr_size=numofbits==8?256:65536;
-    unsigned short max_len=maxcodelength(codelengths,arr_size);
-    fwrite(&max_len,2,1,fp);
-    if(max_len<256){
+    fputc(header,fp);
+    int arr_size=(!header&1)?256:65536;
+    if(!header&2){
         for(int i=0;i<arr_size;i++){
             fputc(**(codelengths+i),fp);
             printf("\r[status] %d/%d %.2f%%",i,arr_size,((double)i/arr_size)*100);
@@ -141,7 +135,7 @@ void write_codelengths(FILE* fp, unsigned short** codelengths, char numofbits){
             //printf("%d\n",**(codelengths+i));
         }
     }
-    
+    if(header&4)fwrite(&leftover,1,1,fp);
     printf("\r\33[2KDone.\n");
 
 }
@@ -187,7 +181,6 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
         }
     //16 bit mode    
     }else{
-        int upper,lower;
         unsigned short* num;
         //reading upper 8 bits
         while(fread(num,sizeof(unsigned short),1,file_in)){
@@ -244,18 +237,12 @@ int maxcodelength(unsigned short** arr,int arr_size){
     return max;
 }
 
-unsigned short** read_codelengths(FILE* fp,int* numofbits){
-    *numofbits=fgetc(fp);
-    if(*numofbits!=8&&*numofbits!=16){
-        printf("[error] Corrupted file!\n");
-        return NULL;
-    }
-    int arr_size=(*numofbits==8?256:65536);
+unsigned short** read_codelengths(FILE* fp,char* header,char* leftover){
+    *header=fgetc(fp);
+    int arr_size=((!header&1)?256:65536);
     unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(unsigned short*));
-    unsigned short max_len;
-    fread(&max_len,sizeof(unsigned short),1,fp);
     printf("Reading codelengths.\n");
-    if(max_len<256){
+    if(!header&2){
         int c;
         for(int i=0;i<arr_size;i++){
             c=fgetc(fp);
@@ -271,6 +258,7 @@ unsigned short** read_codelengths(FILE* fp,int* numofbits){
             printf("%ud ",**(codelengths+i));
         }
     }
+    if(header&4) fread(leftover,1,1,fp);
     printf("Done.\n");
     return codelengths;
 
@@ -303,4 +291,12 @@ char read_bit(FILE* fp,char* buffer){
         buffer_size--;
         return ((*(buffer)&(1<<buffer_size)))>>(buffer_size);
     }
+}
+
+char create_header_byte(compression_bitlength data_bitlength,compression_bitlength codelength_length,int leftover){
+    char header=0;
+    if(data_bitlength==WORD) header|=1;
+    if(codelength_length==WORD) header|=2;
+    if(leftover) header|=4;
+    return header;
 }
