@@ -209,3 +209,13 @@ int search_in_tree(node** tree, char code){
     }
     else return -1;  
 }
+
+char* create_flush(mpz_t* last_code,int length){
+    mpz_t flush_code;
+    mpz_init(flush_code);
+    mpz_add_ui(flush_code,last_code,1);
+    mpz_mul_2exp(flush_code,flush_code,1);
+
+    char* str=mpz_get_str(NULL,2,flush_code);
+    return create_code(str,length);
+}

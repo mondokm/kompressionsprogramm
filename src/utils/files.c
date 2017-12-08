@@ -79,18 +79,13 @@ unsigned long* read_num_of_occurences(FILE* fp, char numofbits, unsigned short* 
         }
     //16 bit mode    
     }else{
-        int upper,lower;
         unsigned short* num;
+        int bytes_read;
         //reading upper 8 bits
-        while(fread(num,sizeof(unsigned short),1,fp)){
-            //reading lower 8 bits
-            /*if((lower=fgetc(fp))!=EOF){
-                num=upper*256+lower;
-            }else{
-                num=upper;
-            }*/
+        while(bytes_read=fread(num,1,2,fp)){
             k++;
-            (*(occurences+*num))++;
+            if(bytes_read==2) (*(occurences+*num))++;
+            else *leftover=*num;
             //updating status every 100 KBytes
             if(k>=50000){
                 cnt+=1;
