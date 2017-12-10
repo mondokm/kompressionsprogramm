@@ -57,7 +57,9 @@ int main(int argc,char** argv){
             return 0;
         }
 
-        char leftover=0;
+        long filesize=get_file_size(file_in);
+
+        short leftover=-1;
         unsigned long* occurences=read_num_of_occurences(file_in,numofbits,&leftover);
         if(file_in!=NULL) close_file(file_in);
 
@@ -67,20 +69,21 @@ int main(int argc,char** argv){
 
         int maxlen=maxcodelength(codelengths,arr_size);
         compression_bitlength codelength_length=BYTE;
-        if(maxlen>8) codelength_length=WORD;
+        if(maxlen>255) codelength_length=WORD;
         unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         
         mpz_t* codes=build_codes(codelengths,arr_size);
-        char** flush=(char**)malloc(sizeof(char*));
         char** dictionary=build_dictionary(codes,codelengths,arr_size);
+        for(int i=0;i<arr_size;i++) printf("%s\n", dictionary[i]);
 
-        char header=create_header_byte()
+        int leftover_exists=(leftover==-1)?0:1;
+        char header=create_header_byte(bitlength,codelength_length,leftover_exists);
 
         file_in=read_file(*(argv+filenum));
         FILE* file_out=write_file(create_filename(*(argv+filenum),COMPRESSION));
-        write_codelengths(file_out,codelengths_dup,numofbits);
-        compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out);
+        write_codelengths(file_out,codelengths_dup,header,leftover,filesize);
+        compress_file(dictionary,codelengths_dup,numofbits,file_in,file_out,leftover, leftover_exists);
         if(file_out!=NULL) close_file(file_out);
         if(file_in!=NULL) close_file(file_in);
         
@@ -97,22 +100,25 @@ int main(int argc,char** argv){
             return 0;
         }
 
-        int numofbits;
-        unsigned short leftover;
-        unsigned short** codelengths=read_codelengths(file_in,&numofbits);
-        int arr_size=(numofbits==8?256:65537);
+        short leftover=-1;
+        char header;
+        long filesize=0;
+        
+        unsigned short** codelengths=read_codelengths(file_in,&header,&leftover,&filesize);
+        int numofbits=(!header&1)?8:16;
+        int arr_size=(!header&1)?256:65536;
+        int leftover_exists=(leftover==-1)?0:1;
+
         unsigned short** codelengths_dup=(unsigned short**)malloc((arr_size)*sizeof(unsigned short*));
         memcpy(codelengths_dup,codelengths,(arr_size)*sizeof(unsigned short*));
         mpz_t* codes=build_codes(codelengths,arr_size);
 
-        char** flush=(char**)malloc(sizeof(char*));
         char** dictionary=build_dictionary(codes,codelengths,arr_size);
-
+        for(int i=0;i<arr_size;i++) printf("%s\n", dictionary[i]);
         node* tree=build_tree_from_codes(dictionary,arr_size);
 
         FILE* file_out=write_file(create_filename(*(argv+filenum),DECOMPRESSION));
-        for(int i=0;i<arr_size;i++) printf("%s\n",dictionary[i]);
-        decompress_file(tree,file_in,file_out,numofbits);
+        decompress_file(tree,file_in,file_out,numofbits, leftover, leftover_exists, filesize);
         
         close_file(file_in);
         close_file(file_out);

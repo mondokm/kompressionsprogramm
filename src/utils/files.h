@@ -15,12 +15,13 @@ void close_file(FILE*);
 
 char* create_filename(char*,compression_mode);
 
-unsigned long* read_num_of_occurences(FILE*, char,unsigned short*);
-void write_codelengths(FILE*,unsigned short**,char);
-unsigned short** read_codelengths(FILE*,int*);
-void compress_file(char**,unsigned short**, char, FILE*, FILE*);
-void decompress_file(node*,FILE*, FILE*, char);
+unsigned long* read_num_of_occurences(FILE*, char,short*);
+void write_codelengths(FILE*,unsigned short**, char,unsigned char, long);
+unsigned short** read_codelengths(FILE*,char*,short*,long*);
+void compress_file(char**,unsigned short**, char, FILE*, FILE*, char, int);
+void decompress_file(node*,FILE*, FILE*, char, unsigned char, int, long);
 long get_file_size(FILE*);
 int maxcodelength(unsigned short**,int);
+char create_header_byte(compression_bitlength,compression_bitlength,int);
 
 #endif

@@ -39,7 +39,7 @@ char* create_filename(char* input,compression_mode mode){
     }
 }
 
-unsigned long* read_num_of_occurences(FILE* fp, char numofbits,char* leftover){
+unsigned long* read_num_of_occurences(FILE* fp, char numofbits,short* leftover){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return NULL;
@@ -117,12 +117,12 @@ void close_file(FILE* fp){
     fclose(fp);
 }
 
-void write_codelengths(FILE* fp, unsigned short** codelengths, char header, char leftover){
+void write_codelengths(FILE* fp, unsigned short** codelengths, char header,unsigned char leftover, long filesize){
     printf("Writing codelengths.\n");
     printf("\e[?25l[status]");
     fputc(header,fp);
     int arr_size=(!header&1)?256:65536;
-    if(!header&2){
+    if(!(header&2)){
         for(int i=0;i<arr_size;i++){
             fputc(**(codelengths+i),fp);
             printf("\r[status] %d/%d %.2f%%",i,arr_size,((double)i/arr_size)*100);
@@ -136,11 +136,12 @@ void write_codelengths(FILE* fp, unsigned short** codelengths, char header, char
         }
     }
     if(header&4)fwrite(&leftover,1,1,fp);
+    fwrite(&filesize,sizeof(long),1,fp);
     printf("\r\33[2KDone.\n");
 
 }
 
-void compress_file(char** dictionary, unsigned short** codelengths, char numofbits, FILE* file_in, FILE* file_out){
+void compress_file(char** dictionary, unsigned short** codelengths, char numofbits, FILE* file_in, FILE* file_out, char leftover, int leftover_exists){
     if(numofbits!=8&&numofbits!=16){
         printf("[error] Unsupported number of bits!");
         return;
@@ -183,7 +184,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
     }else{
         unsigned short* num;
         //reading upper 8 bits
-        while(fread(num,sizeof(unsigned short),1,file_in)){
+        while(fread(num,1,2,file_in)){
             //reading lower 8 bits
             k++;
             size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+*num),**(codelengths+*num));
@@ -200,6 +201,7 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
             }
         }
     }
+    size_of_queue=write_to_file(file_out,queue,size_of_queue,"00000000",8);
     printf("\r\33[2K\e[?25hFinished compressing.\n");
     free(queue);
 }
@@ -237,12 +239,12 @@ int maxcodelength(unsigned short** arr,int arr_size){
     return max;
 }
 
-unsigned short** read_codelengths(FILE* fp,char* header,char* leftover){
+unsigned short** read_codelengths(FILE* fp,char* header,short* leftover, long* filesize){
     *header=fgetc(fp);
-    int arr_size=((!header&1)?256:65536);
+    int arr_size=((!(*header&1))?256:65536);
     unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(unsigned short*));
     printf("Reading codelengths.\n");
-    if(!header&2){
+    if(!(*header&2)){
         int c;
         for(int i=0;i<arr_size;i++){
             c=fgetc(fp);
@@ -258,24 +260,31 @@ unsigned short** read_codelengths(FILE* fp,char* header,char* leftover){
             printf("%ud ",**(codelengths+i));
         }
     }
-    if(header&4) fread(leftover,1,1,fp);
+    if(*header&4) fread(leftover,1,1,fp);
+    fread(filesize,sizeof(long),1,fp);
     printf("Done.\n");
     return codelengths;
 
 }
 
-void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits){
+void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits, unsigned char leftover, int leftover_exists, long filesize){
     char c;
+    long byte_count=0;
+    int size_of_element=numofbits/8;
+    long size_to_check=filesize-leftover_exists;
     char* buffer=(char*)malloc(sizeof(char));
     int num;
     printf("Decompressing file.\n");
     while((c=read_bit(file_in,buffer))!=EOF){
-        //printf("%d",c);
+        printf("%d",c);
         if((num=search_in_tree(&tree,c))!=-1){
-            //printf(" num: %d\n",num);
-            fwrite(&num,numofbits/8,1,file_out);
+            printf(" num: %d\n",num);
+            fwrite(&num,size_of_element,1,file_out);
+            byte_count+=size_of_element;
+            if(byte_count>=size_to_check) break;
         } 
     }
+    if(leftover_exists) fwrite(&leftover,1,1,file_out);
     printf("Finished decompressing.\n");
 }
 

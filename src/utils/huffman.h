@@ -29,6 +29,5 @@ void populate_codelength_array(node*,unsigned short**,int);
 void print_list(list_node*);
 node* build_tree_from_codes(char**,int);
 int search_in_tree(node**,char);
-char* create_flush(mpz_t*,int);
 
 #endif
