@@ -182,12 +182,12 @@ void compress_file(char** dictionary, unsigned short** codelengths, char numofbi
         }
     //16 bit mode    
     }else{
-        unsigned short* num;
+        unsigned short num;
         //reading upper 8 bits
-        while(fread(num,1,2,file_in)){
+        while(fread(&num,1,2,file_in)==2){
             //reading lower 8 bits
             k++;
-            size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+*num),**(codelengths+*num));
+            size_of_queue=write_to_file(file_out,queue,size_of_queue,*(dictionary+num),**(codelengths+num));
             //updating status every 100 KBytes
             if(k>=50000){
                 cnt+=1;
