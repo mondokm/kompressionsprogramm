@@ -241,6 +241,10 @@ int maxcodelength(unsigned short** arr,int arr_size){
 
 unsigned short** read_codelengths(FILE* fp,char* header,short* leftover, long* filesize){
     *header=fgetc(fp);
+    if(((unsigned char)*header)>7){
+        printf("Not a valid archive!\n");
+        return NULL;
+    }
     int arr_size=((!(*header&1))?256:65536);
     unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(unsigned short*));
     printf("Reading codelengths.\n");

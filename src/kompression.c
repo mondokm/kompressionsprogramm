@@ -105,6 +105,7 @@ int main(int argc,char** argv){
         long filesize=0;
         
         unsigned short** codelengths=read_codelengths(file_in,&header,&leftover,&filesize);
+        if(codelengths==NULL) return 1;
         int numofbits=(!header&1)?8:16;
         int arr_size=(!header&1)?256:65536;
         int leftover_exists=(leftover==-1)?0:1;
