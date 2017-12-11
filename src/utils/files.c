@@ -336,7 +336,7 @@ char read_bit(FILE* fp,char* buffer){
 
 //creates the header byte
 char create_header_byte(compression_bitlength data_bitlength,compression_bitlength codelength_length,int leftover){
-    //XXXXXCBA: A: type of compression used (8/16-bit) B: the size of the codelengths C: 1 if there is a leftover-bit
+    //00000CBA: A: type of compression used (8/16-bit) B: the size of the codelengths C: 1 if there is a leftover-bit
     char header=0;
     if(data_bitlength==WORD) header|=1;
     if(codelength_length==WORD) header|=2;

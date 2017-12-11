@@ -9,6 +9,7 @@ char* create_code(char*,int);
 unsigned char binary_to_decimal(char*);
 void add_to_tree(node*, node*, char*, unsigned short);
 
+//frees the tree
 void free_tree(node* root){
     if(root->right!=NULL&&root->left!=NULL) {
         free_tree(root->right);
@@ -17,6 +18,7 @@ void free_tree(node* root){
     free(root);
 }
 
+//builds a list, the elements of which each contain a node of the tree
 list_node* build_nodeptr_list(unsigned long* occurences,int arr_size){
     printf("Building list of nodes.\n");
     list_node* list=NULL;
@@ -28,10 +30,12 @@ list_node* build_nodeptr_list(unsigned long* occurences,int arr_size){
     return list;
 }
 
+//builds a tree from the list of nodes
 node* build_node_tree(list_node* list,int arr_size){
     printf("Building tree.\n");
     int remaining=arr_size;
     printf("\e[?25l[status] %d/%d remaining, %.2f%%",remaining,arr_size,((double) 0/arr_size)*100);
+    //always finds the two nodes with the lowest frequencies, and makes a joint node, which points to them
     while(list->next!=NULL){
         node* newnode=(node*) malloc(sizeof(node));
 
@@ -51,6 +55,7 @@ node* build_node_tree(list_node* list,int arr_size){
     return list->nodeptr;
 }
 
+//attaches an element to the top of the list
 list_node* add_list_node(list_node* list,node* nodeptr){
     if(list==NULL) {
         list=(list_node*) malloc(sizeof(list_node));
@@ -65,6 +70,7 @@ list_node* add_list_node(list_node* list,node* nodeptr){
     }
 }
 
+//creates a new node with the given value and frequency
 node* newnode(unsigned short value,unsigned long frequency){
     node* newnode=(node*)malloc(sizeof(node));
     newnode->value=value;
@@ -73,6 +79,7 @@ node* newnode(unsigned short value,unsigned long frequency){
     newnode->right=NULL;
 }
 
+//find the least frequent element of the list
 list_node* find_least_frequent(list_node* list){
     if(list->next==NULL){
         return list;
@@ -83,6 +90,7 @@ list_node* find_least_frequent(list_node* list){
     }
 }
 
+//removes an element from the list
 list_node* remove_from_list(list_node* list,list_node* element){
     if(list==NULL) return NULL;
     if(list==element) return list->next;
@@ -99,6 +107,7 @@ void print_list(list_node* list){
     if(list->next!=NULL)print_list(list->next);
 }
 
+//builds an array from the codelengths
 unsigned short** build_codelength_array(node* tree,int arr_size){
     unsigned short** codelengths=(unsigned short**) malloc(arr_size*sizeof(int*));
     for(int i=0;i<arr_size;i++){
@@ -109,6 +118,7 @@ unsigned short** build_codelength_array(node* tree,int arr_size){
     return codelengths;
 }
 
+//goes through each element of the tree recursively, and updates the codelength array upon reaching the end of the tree
 void populate_codelength_array(node* tree,unsigned short** arr,int length){
     if(tree->left==NULL&&tree->right==NULL){
         **(arr+(tree->value))=length;
@@ -118,6 +128,10 @@ void populate_codelength_array(node* tree,unsigned short** arr,int length){
     }
 }
 
+//creates the codes
+//sorts the array by codelength
+//takes zeroes as the first code
+//when creating a new code, it takes the previous code, adds 1 to it and attaches current_codelength-prev_codelength number of zeroes ti the end
 mpz_t* build_codes(unsigned short** arr,int arr_size){
     mpz_t* dictionary=(mpz_t*) malloc(arr_size*sizeof(mpz_t));
     qsort(arr,arr_size,sizeof(int*),compare_codelengths);
@@ -126,12 +140,11 @@ mpz_t* build_codes(unsigned short** arr,int arr_size){
         mpz_init(dictionary[i]);
         mpz_add_ui(dictionary[i],dictionary[i-1],1);
         mpz_mul_2exp(dictionary[i],dictionary[i],**(arr+i)-**(arr+i-1));
-        //mpz_out_str(stdout,2,dictionary[i]);
-        //printf(" %d\n", **(arr+i));
     }
     return dictionary;
 }
 
+//builds a string array from the codes
 char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size){
     char** dictionary=(char**) malloc(arr_size*sizeof(char*));
     for(int i=0;i<arr_size;i++){
@@ -141,6 +154,7 @@ char** build_dictionary(mpz_t* codes, unsigned short** codelengths, int arr_size
     return dictionary;
 }
 
+//compare function for qsort
 int compare_codelengths(const void* a, const void* b){
     int length1=*(*((unsigned short**)a)),length2=*(*((unsigned short**)b)),value1=*(*((unsigned short**)a)+1),value2=*(*((unsigned short**)b)+1);
     if(length1<length2) return -1;
@@ -149,6 +163,7 @@ int compare_codelengths(const void* a, const void* b){
     } else return 1;
 }
 
+//attaches zeroes to the beginning of the code
 char* create_code(char* str,int len){
      char* code=(char*) malloc((len+1)*sizeof(int));
      int n=len-strlen(str);
@@ -162,6 +177,7 @@ char* create_code(char* str,int len){
      return code;
 }
 
+//builds a searchtree from the codes
 node* build_tree_from_codes(char** codes,int arr_size){
     node* head=(node*) malloc(sizeof(node));
     head->left=NULL;
@@ -173,6 +189,8 @@ node* build_tree_from_codes(char** codes,int arr_size){
     return head;
 }
 
+//adds an element to the tree
+//the root of the tree is the left child of all endelements, so when we reach the end of the tree (we found a value), we jump back to the beginning
 void add_to_tree(node* tree, node* head, char* code, unsigned short value){
     if(strlen(code)==1){
         if(tree->left==NULL) tree->left=(node*) malloc(sizeof(node));
@@ -199,6 +217,8 @@ void add_to_tree(node* tree, node* head, char* code, unsigned short value){
     }
 }
 
+//jumps to the left or the right child
+//if it reaches the end, it returns the value it finds
 int search_in_tree(node** tree, char code){
     if(code==0) *tree=(*tree)->left;
     else *tree=(*tree)->right;
