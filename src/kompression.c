@@ -75,7 +75,6 @@ int main(int argc,char** argv){
         
         mpz_t* codes=build_codes(codelengths,arr_size);
         char** dictionary=build_dictionary(codes,codelengths,arr_size);
-        for(int i=0;i<arr_size;i++) printf("%s\n", dictionary[i]);
 
         int leftover_exists=(leftover==-1)?0:1;
         char header=create_header_byte(bitlength,codelength_length,leftover_exists);
@@ -115,7 +114,6 @@ int main(int argc,char** argv){
         mpz_t* codes=build_codes(codelengths,arr_size);
 
         char** dictionary=build_dictionary(codes,codelengths,arr_size);
-        for(int i=0;i<arr_size;i++) printf("%s\n", dictionary[i]);
         node* tree=build_tree_from_codes(dictionary,arr_size);
 
         FILE* file_out=write_file(create_filename(*(argv+filenum),DECOMPRESSION));
@@ -124,7 +122,7 @@ int main(int argc,char** argv){
         close_file(file_in);
         close_file(file_out);
 
-        free_tree(tree);
+        free_search_tree(tree);
         free(codelengths);
         free(codelengths_dup);
         free(dictionary);

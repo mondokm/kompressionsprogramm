@@ -229,3 +229,13 @@ int search_in_tree(node** tree, char code){
     }
     else return -1;  
 }
+
+//frees the tree
+void free_search_tree(node* tree){
+    //none of the left children are NULL
+    if(tree->right!=NULL){
+        free_search_tree(tree->left);
+        free_search_tree(tree->right);
+    }
+    free(tree);
+}
