@@ -303,12 +303,27 @@ void decompress_file(node* tree,FILE* file_in, FILE* file_out, char numofbits, u
     //we check if we reached the end of file with this variable, because we don't want to read the zeroes that we used to flush at the end
     long size_to_check=filesize-leftover_exists;
     char* buffer=(char*)malloc(sizeof(char));
-    int num;
+    //variables for status updates
+    int num, cnt=0, numofmbytes;
+    int filesize_MB=filesize/1000000;
+    char str[12];
+    sprintf(str,"MB/%ldMB ",filesize_MB);
     printf("Decompressing file.\n");
     while((c=read_bit(file_in,buffer))!=EOF){
         if((num=search_in_tree(&tree,c))!=-1){
             fwrite(&num,size_of_element,1,file_out);
             byte_count+=size_of_element;
+            cnt++;
+            if(cnt>=100000){
+                numofmbytes=byte_count/1000000;
+                #if defined(__linux__) && defined(__amd64__)
+                print_num(numofmbytes,str,12,(int)(((double)numofmbytes/filesize_MB)*100));
+                #else
+                printf("\r[status] %luMB/%ldMB %2.2lf%%",numofmbytes,filesize_MB,((double)numofmbytes/filesize_MB)*100);
+                #endif
+                cnt=0;
+            }
+            
             if(byte_count>=size_to_check) break;
         } 
     }
