@@ -11,7 +11,7 @@ Ein einfaches Huffman-Coding benutzendes Kompressionsprogramm. Das Programm kann
 ```
 git clone --recursive https://github.com/mondokm/kompressionsprogramm.git
 cd kompressionsprogramm
-sudo make install
+make install
 ```
 
 ## Verwendung
