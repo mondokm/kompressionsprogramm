@@ -1,4 +1,5 @@
 all:
+	mkdir -p bin
 	gcc -c src/utils/print_state.s -o src/utils/print_state.o
 	gcc src/kompression.c src/utils/huffman.c src/utils/files.c src/utils/print_state.o -o bin/komp -lgmp
 
